@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maui Area Maps — June 2026</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f4f8;padding:12px;}
+
+.page-header{background:linear-gradient(135deg,#005f8e,#0096c7);color:white;border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.page-header h1{font-size:17px;font-weight:800;}
+.page-header p{font-size:12px;opacity:.85;margin-top:2px;}
+
+.print-btn{background:white;color:#0077b6;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;}
+.back-btn{display:inline-flex;align-items:center;gap:5px;background:#e2e8f0;color:#2d3748;padding:7px 13px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;margin-bottom:12px;}
+
+.map-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+.map-card{background:white;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.map-title{padding:10px 14px;font-weight:800;font-size:13px;color:#1a202c;border-bottom:1px solid #f0f4f8;display:flex;align-items:center;gap:6px;}
+.map-box{height:320px;background:#cce5f5;}
+
+/* Road to Hana spans full width — it's a long route */
+.map-card.full{grid-column:1/-1;}
+.map-card.full .map-box{height:360px;}
+
+.tip{background:#fffaf0;border:1px solid #f6ad55;border-radius:8px;padding:10px 13px;font-size:12px;color:#744210;margin-bottom:12px;line-height:1.5;}
+.tip strong{color:#c05621;}
+
+/* ── PRINT ── */
+@media print {
+  body{background:white;padding:6px;}
+  .page-header{-webkit-print-color-adjust:exact;print-color-adjust:exact;margin-bottom:8px;padding:8px 12px;}
+  .page-header h1{font-size:14px;}
+  .print-btn,.back-btn,.tip{display:none!important;}
+  .map-grid{grid-template-columns:1fr 1fr;gap:8px;}
+  .map-card{box-shadow:none;border:1px solid #ddd;page-break-inside:avoid;}
+  .map-card.full{page-break-before:always;}
+  .map-box{height:270px !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .map-card.full .map-box{height:310px !important;}
+  .map-title{font-size:11px;padding:6px 10px;}
+}
+</style>
+</head>
+<body>
+
+<a class="back-btn" href="/maui-trip/">← Back to Itinerary</a>
+
+<div class="page-header">
+  <div>
+    <h1>🌺 Maui Area Maps</h1>
+    <p>June 10–14, 2026 · Sheraton Maui Resort · Ka'anapali</p>
+  </div>
+  <button class="print-btn" onclick="window.print()">🖨️ Print Maps</button>
+</div>
+
+<div class="tip">
+  <strong>Before printing:</strong> Wait for all 5 maps below to fully load (you'll see streets and road names). Then click Print Maps. Requires internet connection to load map tiles.
+</div>
+
+<div class="map-grid">
+
+  <div class="map-card">
+    <div class="map-title">🏨 NW Maui — Ka'anapali &amp; Lahaina</div>
+    <div id="m-nw" class="map-box"></div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-title">✈️ Central Maui — Airport &amp; Iao Valley</div>
+    <div id="m-central" class="map-box"></div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-title">🐢 SW Maui — Kihei, Wailea &amp; Makena</div>
+    <div id="m-sw" class="map-box"></div>
+  </div>
+
+  <div class="map-card">
+    <div class="map-title">🌺 Upcountry — Kula &amp; Makawao</div>
+    <div id="m-upcountry" class="map-box"></div>
+  </div>
+
+  <div class="map-card full">
+    <div class="map-title">🌿 Road to Hana — Full Route (Pa'ia → Seven Sacred Pools)</div>
+    <div id="m-hana" class="map-box"></div>
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+function pin(col, n) {
+  return L.divIcon({ className:'', iconAnchor:[13,13],
+    html:'<div style="width:25px;height:25px;background:'+col+';border-radius:50%;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:800;">'+n+'</div>'
+  });
+}
+
+function buildMap(id, center, zoom, stops) {
+  var m = L.map(id, { zoomControl:true, attributionControl:true });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom:18, attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>'
+  }).addTo(m);
+  m.setView(center, zoom);
+  stops.forEach(function(s, i) {
+    L.marker(s.ll, { icon: pin(s.col, i+1) }).addTo(m)
+      .bindPopup('<strong>'+s.n+'</strong>');
+  });
+  setTimeout(function(){ m.invalidateSize(); }, 300);
+  return m;
+}
+
+buildMap('m-nw', [20.895, -156.670], 13, [
+  { ll:[20.9260,-156.6927], n:'Sheraton Maui Resort', col:'#d53f8c' },
+  { ll:[20.9268,-156.6921], n:'Black Rock — Turtles & Cliff Dive', col:'#d53f8c' },
+  { ll:[20.9341,-156.6944], n:'Skyline Zipline', col:'#0077b6' },
+  { ll:[20.8763,-156.6793], n:'Downtown Lahaina', col:'#0077b6' },
+  { ll:[20.8820,-156.6740], n:"Ululani's Shaved Ice", col:'#38a169' },
+  { ll:[20.8794,-156.6769], n:'Safeway Lahaina', col:'#38a169' },
+  { ll:[20.8140,-156.6473], n:"Leoda's Kitchen (Olowalu)", col:'#38a169' },
+  { ll:[20.9250,-156.6860], n:'Monkeypod Kitchen', col:'#d53f8c' },
+]);
+
+buildMap('m-central', [20.889, -156.490], 12, [
+  { ll:[20.8986,-156.4306], n:'Kahului Airport (OGG)', col:'#dd6b20' },
+  { ll:[20.8797,-156.5486], n:'Iao Valley State Monument', col:'#0077b6' },
+  { ll:[20.8896,-156.4696], n:'Kahului — Gas & Safeway', col:'#38a169' },
+]);
+
+buildMap('m-sw', [20.720, -156.440], 12, [
+  { ll:[20.7927,-156.5063], n:'Maalaea Harbor & Ocean Center', col:'#0077b6' },
+  { ll:[20.7600,-156.4484], n:'Kihei Town — Lunch', col:'#38a169' },
+  { ll:[20.7478,-156.4441], n:"Ululani's Shaved Ice Kihei", col:'#38a169' },
+  { ll:[20.6386,-156.4418], n:'Turtle Town — Maluaka Beach', col:'#d53f8c' },
+  { ll:[20.6278,-156.4364], n:'Makena Big Beach', col:'#0077b6' },
+]);
+
+buildMap('m-upcountry', [20.780, -156.330], 12, [
+  { ll:[20.7714,-156.3394], n:'Upcountry Farmers Market', col:'#38a169' },
+  { ll:[20.7607,-156.3298], n:"Ali'i Kula Lavender Farm", col:'#805ad5' },
+  { ll:[20.7468,-156.3225], n:'Surfing Goat Dairy', col:'#38a169' },
+  { ll:[20.8573,-156.3100], n:'Makawao Town', col:'#0077b6' },
+]);
+
+buildMap('m-hana', [20.830, -156.150], 10, [
+  { ll:[20.9161,-156.3762], n:'1 — Paia Town (Breakfast + Açaí Bowl)', col:'#38a169' },
+  { ll:[20.9358,-156.3562], n:"2 — Ho'okipa Beach (Turtles on sand!)", col:'#d53f8c' },
+  { ll:[20.9046,-156.2499], n:'3 — Twin Falls', col:'#0077b6' },
+  { ll:[20.8831,-156.2037], n:'4 — Garden of Eden Arboretum', col:'#d53f8c' },
+  { ll:[20.8393,-156.0744], n:"5 — Aunty Sandy's Banana Bread (Mile 18)", col:'#38a169' },
+  { ll:[20.7734,-155.9900], n:'6 — Black Sand Beach (Reservation Required)', col:'#0077b6' },
+  { ll:[20.7621,-155.9893], n:'7 — Hana Town (Lunch + Shaved Ice)', col:'#38a169' },
+  { ll:[20.6659,-156.0425], n:'8 — Seven Sacred Pools (Reservation Required)', col:'#0077b6' },
+]);
+</script>
+</body>
+</html>
