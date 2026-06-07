@@ -19,38 +19,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .banner{background:#0f172a;color:#94a3b8;font-size:12px;padding:7px 14px;text-align:center;line-height:1.5;}
 .banner strong{color:#38bdf8;}
 
-/* ════════════════════════════════════════
-   CSS-ONLY TABS
-   Inputs, tab-bar, and content-grid are
-   ALL direct children of .app — so the
-   general-sibling selector ~ works correctly
-   ════════════════════════════════════════ */
-.tab-r{display:none !important;}
-
+/* TABS */
 .tab-bar{display:flex;overflow-x:auto;background:#fff;border-bottom:2px solid #e2e8f0;-webkit-overflow-scrolling:touch;}
 .tab-bar::-webkit-scrollbar{height:3px;}
-.tab-lbl{padding:12px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;color:#718096;flex-shrink:0;-webkit-tap-highlight-color:transparent;}
+.tab-lbl{padding:12px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;color:#718096;flex-shrink:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+.tab-lbl.active{color:#0077b6;border-bottom-color:#0077b6;}
 
-/* Active tab */
-#r1:checked ~ .tab-bar label[for=r1],
-#r2:checked ~ .tab-bar label[for=r2],
-#r3:checked ~ .tab-bar label[for=r3],
-#r4:checked ~ .tab-bar label[for=r4],
-#r5:checked ~ .tab-bar label[for=r5],
-#r6:checked ~ .tab-bar label[for=r6],
-#r7:checked ~ .tab-bar label[for=r7]{color:#0077b6;border-bottom-color:#0077b6;}
-
-/* Hide all panels by default */
+/* Panels — JS controls visibility */
 .day-panel{display:none;}
-
-/* Show the selected panel */
-#r1:checked ~ .content-grid #day1,
-#r2:checked ~ .content-grid #day2,
-#r3:checked ~ .content-grid #day3,
-#r4:checked ~ .content-grid #day4,
-#r5:checked ~ .content-grid #day5,
-#r6:checked ~ .content-grid #areas,
-#r7:checked ~ .content-grid #notes{display:block;}
+#day1{display:block;}
 
 /* LAYOUT */
 .app{display:flex;flex-direction:column;}
@@ -164,29 +141,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   📶 <strong>Works offline</strong> once you open the link on WiFi. All tabs &amp; details stay available without signal — great for Road to Hana.
 </div>
 
-<!-- ══════════════════════════════════════════
-     .app wraps everything. The 7 radio inputs,
-     .tab-bar, and .content-grid are ALL direct
-     children of .app so the ~ selector works.
-     ══════════════════════════════════════════ -->
 <div class="app">
 
-  <input class="tab-r" type="radio" name="d" id="r1" checked>
-  <input class="tab-r" type="radio" name="d" id="r2">
-  <input class="tab-r" type="radio" name="d" id="r3">
-  <input class="tab-r" type="radio" name="d" id="r4">
-  <input class="tab-r" type="radio" name="d" id="r5">
-  <input class="tab-r" type="radio" name="d" id="r6">
-  <input class="tab-r" type="radio" name="d" id="r7">
-
   <div class="tab-bar">
-    <label class="tab-lbl" for="r1">Day 1</label>
-    <label class="tab-lbl" for="r2">Day 2 · Hana</label>
-    <label class="tab-lbl" for="r3">Day 3</label>
-    <label class="tab-lbl" for="r4">Day 4</label>
-    <label class="tab-lbl" for="r5">Day 5</label>
-    <label class="tab-lbl" for="r6">🗺 Area Maps</label>
-    <label class="tab-lbl" for="r7">⚠️ Book Now</label>
+    <div class="tab-lbl active" onclick="showTab('day1',this)">Day 1</div>
+    <div class="tab-lbl" onclick="showTab('day2',this)">Day 2 · Hana</div>
+    <div class="tab-lbl" onclick="showTab('day3',this)">Day 3</div>
+    <div class="tab-lbl" onclick="showTab('day4',this)">Day 4</div>
+    <div class="tab-lbl" onclick="showTab('day5',this)">Day 5</div>
+    <div class="tab-lbl" onclick="showTab('areas',this)">🗺 Area Maps</div>
+    <div class="tab-lbl" onclick="showTab('notes',this)">⚠️ Book Now</div>
   </div>
 
   <div class="content-grid">
@@ -804,10 +768,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/maui-trip/sw.js').catch(function(){});
 }
+
+function showTab(id, el) {
+  document.querySelectorAll('.day-panel').forEach(function(p){ p.style.display='none'; });
+  document.getElementById(id).style.display = 'block';
+  document.querySelectorAll('.tab-lbl').forEach(function(t){ t.classList.remove('active'); });
+  el.classList.add('active');
+  if (typeof renderMain === 'function') {
+    renderMain(id);
+    setTimeout(function(){ if(mainMap) mainMap.invalidateSize(); }, 100);
+  }
+  if (id === 'areas' && !areaDone) { areaDone = true; setTimeout(initArea, 300); }
+}
+var mainMap = null;
+var areaDone = false;
 (function(){
   try {
     if (typeof L === 'undefined') return;
-    var mainMap = L.map('map',{zoomControl:true,attributionControl:false});
+    mainMap = L.map('map',{zoomControl:true,attributionControl:false});
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(mainMap);
     L.control.attribution({prefix:'© <a href="https://openstreetmap.org">OSM</a>'}).addTo(mainMap);
     var mapDiv = document.getElementById('map');
@@ -884,7 +862,6 @@ if ('serviceWorker' in navigator) {
     setTimeout(function(){mainMap.invalidateSize();},300);
 
     var keys=['day1','day2','day3','day4','day5','areas','notes'];
-    var areaDone=false;
     for(var i=1;i<=7;i++){
       (function(idx){
         var el=document.getElementById('r'+idx);
