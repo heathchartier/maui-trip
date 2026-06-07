@@ -936,10 +936,10 @@ function buildAreaMaps() {
 // ── INIT MAIN MAP ────────────────────────────────
 try {
   if (typeof L !== 'undefined') {
+    document.getElementById('map').innerHTML = '';
     G.map = L.map('map', {zoomControl:true, attributionControl:false});
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(G.map);
     L.control.attribution({prefix:'© <a href="https://openstreetmap.org">OSM</a>'}).addTo(G.map);
-    document.getElementById('map').innerHTML = '';
     mapShow('day1');
     setTimeout(function(){ G.map.invalidateSize(); }, 300);
     G.ready = true;
