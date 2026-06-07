@@ -783,162 +783,168 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+// ── SERVICE WORKER ──────────────────────────────
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/maui-trip/sw.js').catch(function(){});
 }
 
+// ── GLOBAL STATE ────────────────────────────────
+var G = { map: null, mks: [], lns: [], areaDone: false, ready: false };
+
+// ── TAB SWITCHING — called by onclick on each tab ──
 function showTab(id, el) {
-  document.querySelectorAll('.day-panel').forEach(function(p){ p.style.display='none'; });
-  document.getElementById(id).style.display = 'block';
-  document.querySelectorAll('.tab-lbl').forEach(function(t){ t.classList.remove('active'); });
-  el.classList.add('active');
-  if (typeof renderMain === 'function') {
-    renderMain(id);
-    setTimeout(function(){ if(mainMap) mainMap.invalidateSize(); }, 100);
+  // hide all panels
+  var panels = document.querySelectorAll('.day-panel');
+  for (var i=0; i<panels.length; i++) panels[i].style.display = 'none';
+  // show selected panel
+  var p = document.getElementById(id);
+  if (p) p.style.display = 'block';
+  // update tab highlight
+  var tabs = document.querySelectorAll('.tab-lbl');
+  for (var j=0; j<tabs.length; j++) tabs[j].classList.remove('active');
+  if (el) el.classList.add('active');
+  // update map pins if map loaded
+  if (G.ready) {
+    mapShow(id);
+    setTimeout(function(){ G.map.invalidateSize(); }, 120);
   }
-  if (id === 'areas' && !areaDone) { areaDone = true; setTimeout(initArea, 300); }
+  // init area maps first time
+  if (id === 'areas' && !G.areaDone) {
+    G.areaDone = true;
+    setTimeout(buildAreaMaps, 350);
+  }
 }
-var mainMap = null;
-var areaDone = false;
-(function(){
-  try {
-    if (typeof L === 'undefined') return;
-    mainMap = L.map('map',{zoomControl:true,attributionControl:false});
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(mainMap);
-    L.control.attribution({prefix:'© <a href="https://openstreetmap.org">OSM</a>'}).addTo(mainMap);
-    var mapDiv = document.getElementById('map');
-    if (mapDiv.querySelector('.map-msg')) mapDiv.innerHTML = '';
 
-    var mks=[], lns=[];
-    var DAYS={
-      day1:{c:[20.89,-156.57],z:11,p:[
-        {ll:[20.8986,-156.4306],n:'1 Airport OGG',col:'#0077b6'},
-        {ll:[20.8797,-156.5486],n:'2 Iao Valley',col:'#0077b6'},
-        {ll:[20.8140,-156.6473],n:"3 Leoda's Kitchen",col:'#38a169'},
-        {ll:[20.8794,-156.6769],n:'4 Safeway Lahaina',col:'#0077b6'},
-        {ll:[20.9260,-156.6927],n:'5 Sheraton Maui',col:'#0077b6'},
-        {ll:[20.9268,-156.6921],n:'6 Black Rock Cliff Dive',col:'#d53f8c'},
-        {ll:[20.8763,-156.6793],n:'7 Old Lahaina Luau',col:'#805ad5'}]},
-      day2:{c:[20.84,-156.10],z:10,p:[
-        {ll:[20.9161,-156.3762],n:'1 Paia Town',col:'#38a169'},
-        {ll:[20.9046,-156.2499],n:'2 Twin Falls',col:'#0077b6'},
-        {ll:[20.8831,-156.2037],n:'3 Garden of Eden',col:'#d53f8c'},
-        {ll:[20.8393,-156.0744],n:"4 Aunty Sandy's",col:'#38a169'},
-        {ll:[20.7734,-155.9900],n:'5 Black Sand Beach',col:'#d53f8c'},
-        {ll:[20.7621,-155.9893],n:'6 Hana Town',col:'#38a169'},
-        {ll:[20.6659,-156.0425],n:'7 Seven Sacred Pools',col:'#0077b6'}]},
-      day3:{c:[20.73,-156.44],z:11,p:[
-        {ll:[20.7927,-156.5063],n:'1 Maalaea Harbor',col:'#0077b6'},
-        {ll:[20.7600,-156.4484],n:'2 Kihei Lunch',col:'#38a169'},
-        {ll:[20.6386,-156.4418],n:'3 Turtle Town',col:'#d53f8c'},
-        {ll:[20.6278,-156.4364],n:'4 Makena Big Beach',col:'#0077b6'},
-        {ll:[20.7478,-156.4441],n:"5 Ululani's Shaved Ice",col:'#d53f8c'}]},
-      day4:{c:[20.90,-156.60],z:12,p:[
-        {ll:[20.9341,-156.6944],n:'1 Skyline Zipline',col:'#0077b6'},
-        {ll:[20.9268,-156.6921],n:'2 Black Rock Snorkel',col:'#d53f8c'},
-        {ll:[20.8763,-156.6793],n:'3 Downtown Lahaina',col:'#0077b6'},
-        {ll:[20.8820,-156.6740],n:"4 Ululani's Shaved Ice",col:'#d53f8c'},
-        {ll:[20.9291,-156.3558],n:"5 Mama's Fish House",col:'#d53f8c'}]},
-      day5:{c:[20.78,-156.33],z:11,p:[
-        {ll:[20.7714,-156.3394],n:'1 Farmers Market',col:'#38a169'},
-        {ll:[20.7607,-156.3298],n:'2 Lavender Farm',col:'#805ad5'},
-        {ll:[20.8573,-156.3100],n:'3 Makawao Town',col:'#0077b6'},
-        {ll:[20.8986,-156.4306],n:'4 Airport OGG',col:'#dd6b20'}]},
-      areas:{c:[20.80,-156.33],z:10,p:[
-        {ll:[20.9260,-156.6927],n:'Sheraton Maui',col:'#d53f8c'},
-        {ll:[20.8986,-156.4306],n:'Airport OGG',col:'#0077b6'},
-        {ll:[20.7927,-156.5063],n:'Maalaea Harbor',col:'#0077b6'},
-        {ll:[20.6386,-156.4418],n:'Turtle Town',col:'#38a169'},
-        {ll:[20.7621,-155.9893],n:'Hana',col:'#0077b6'},
-        {ll:[20.7714,-156.3394],n:'Upcountry',col:'#805ad5'}]},
-      notes:{c:[20.80,-156.33],z:10,p:[]}
-    };
+// ── MAP DATA ────────────────────────────────────
+var DAYS = {
+  day1:{c:[20.89,-156.57],z:11,p:[
+    {ll:[20.8986,-156.4306],n:'1 Airport OGG',col:'#0077b6'},
+    {ll:[20.8797,-156.5486],n:'2 Iao Valley',col:'#0077b6'},
+    {ll:[20.8140,-156.6473],n:"3 Leoda's Kitchen",col:'#38a169'},
+    {ll:[20.8794,-156.6769],n:'4 Safeway Lahaina',col:'#0077b6'},
+    {ll:[20.9260,-156.6927],n:'5 Sheraton Maui',col:'#0077b6'},
+    {ll:[20.9268,-156.6921],n:'6 Black Rock Cliff Dive',col:'#d53f8c'},
+    {ll:[20.8763,-156.6793],n:'7 Old Lahaina Luau',col:'#805ad5'}]},
+  day2:{c:[20.84,-156.10],z:10,p:[
+    {ll:[20.9161,-156.3762],n:'1 Paia Town',col:'#38a169'},
+    {ll:[20.9046,-156.2499],n:'2 Twin Falls',col:'#0077b6'},
+    {ll:[20.8831,-156.2037],n:'3 Garden of Eden',col:'#d53f8c'},
+    {ll:[20.8393,-156.0744],n:"4 Aunty Sandy's",col:'#38a169'},
+    {ll:[20.7734,-155.9900],n:'5 Black Sand Beach',col:'#d53f8c'},
+    {ll:[20.7621,-155.9893],n:'6 Hana Town',col:'#38a169'},
+    {ll:[20.6659,-156.0425],n:'7 Seven Sacred Pools',col:'#0077b6'}]},
+  day3:{c:[20.73,-156.44],z:11,p:[
+    {ll:[20.7927,-156.5063],n:'1 Maalaea Harbor',col:'#0077b6'},
+    {ll:[20.7600,-156.4484],n:'2 Kihei Lunch',col:'#38a169'},
+    {ll:[20.6386,-156.4418],n:'3 Turtle Town',col:'#d53f8c'},
+    {ll:[20.6278,-156.4364],n:'4 Makena Big Beach',col:'#0077b6'},
+    {ll:[20.7478,-156.4441],n:"5 Ululani's Shaved Ice",col:'#d53f8c'}]},
+  day4:{c:[20.80,-156.45],z:11,p:[
+    {ll:[20.7714,-156.3394],n:'1 Farmers Market',col:'#38a169'},
+    {ll:[20.7607,-156.3298],n:'2 Lavender Farm',col:'#805ad5'},
+    {ll:[20.8573,-156.3100],n:'3 Makawao',col:'#0077b6'},
+    {ll:[20.9341,-156.6944],n:'4 Skyline Zipline',col:'#0077b6'},
+    {ll:[20.9268,-156.6921],n:'5 Black Rock Snorkel',col:'#d53f8c'},
+    {ll:[20.8763,-156.6793],n:'6 Downtown Lahaina',col:'#0077b6'},
+    {ll:[20.9291,-156.3558],n:"7 Mama's Fish House",col:'#d53f8c'}]},
+  day5:{c:[20.91,-156.67],z:13,p:[
+    {ll:[20.9260,-156.6927],n:'1 Black Rock Beach',col:'#d53f8c'},
+    {ll:[20.9260,-156.6850],n:'2 Brunch Nearby',col:'#38a169'},
+    {ll:[20.8986,-156.4306],n:'3 Airport OGG',col:'#dd6b20'}]},
+  areas:{c:[20.80,-156.33],z:10,p:[
+    {ll:[20.9260,-156.6927],n:'Sheraton Maui',col:'#d53f8c'},
+    {ll:[20.8986,-156.4306],n:'Airport OGG',col:'#0077b6'},
+    {ll:[20.7927,-156.5063],n:'Maalaea Harbor',col:'#0077b6'},
+    {ll:[20.6386,-156.4418],n:'Turtle Town',col:'#38a169'},
+    {ll:[20.7621,-155.9893],n:'Hana',col:'#0077b6'},
+    {ll:[20.7714,-156.3394],n:'Upcountry',col:'#805ad5'}]},
+  notes:{c:[20.80,-156.33],z:10,p:[]}
+};
 
-    function ico(col,n){
-      return L.divIcon({className:'',iconAnchor:[14,14],
-        html:'<div style="width:27px;height:27px;background:'+col+';border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">'+n+'</div>'});
-    }
+// ── ICON FACTORY ────────────────────────────────
+function mkIcon(col, n) {
+  return L.divIcon({ className:'', iconAnchor:[14,14],
+    html:'<div style="width:27px;height:27px;background:'+col+';border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">'+n+'</div>'
+  });
+}
 
-    function renderMain(key){
-      mks.forEach(function(m){mainMap.removeLayer(m);});
-      lns.forEach(function(l){mainMap.removeLayer(l);});
-      mks=[];lns=[];
-      var d=DAYS[key];if(!d)return;
-      mainMap.setView(d.c,d.z);
-      d.p.forEach(function(p,i){
-        var m=L.marker(p.ll,{icon:ico(p.col,i+1)}).addTo(mainMap)
-          .bindPopup('<strong style="font-size:13px">'+p.n+'</strong>');
-        mks.push(m);
-      });
-      if(d.p.length>1){
-        lns.push(L.polyline(d.p.map(function(p){return p.ll;}),
-          {color:'#0077b6',weight:2.5,opacity:.4,dashArray:'6,6'}).addTo(mainMap));
-      }
-    }
+// ── MAIN MAP RENDER ─────────────────────────────
+function mapShow(key) {
+  G.mks.forEach(function(m){ G.map.removeLayer(m); });
+  G.lns.forEach(function(l){ G.map.removeLayer(l); });
+  G.mks=[]; G.lns=[];
+  var d = DAYS[key]; if (!d) return;
+  G.map.setView(d.c, d.z);
+  d.p.forEach(function(p,i){
+    var m = L.marker(p.ll, {icon:mkIcon(p.col,i+1)}).addTo(G.map)
+      .bindPopup('<strong style="font-size:13px">'+p.n+'</strong>');
+    G.mks.push(m);
+  });
+  if (d.p.length > 1) {
+    G.lns.push(L.polyline(d.p.map(function(p){ return p.ll; }),
+      {color:'#0077b6',weight:2.5,opacity:.4,dashArray:'6,6'}).addTo(G.map));
+  }
+}
 
-    renderMain('day1');
-    setTimeout(function(){mainMap.invalidateSize();},300);
+// ── AREA MINI-MAPS ──────────────────────────────
+function buildAreaMaps() {
+  function aMap(id, center, zoom, pins) {
+    var el = document.getElementById(id); if (!el) return;
+    var m = L.map(id, {zoomControl:true, attributionControl:false});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(m);
+    m.setView(center, zoom);
+    pins.forEach(function(p,i){
+      L.marker(p.ll, {icon:mkIcon(p.col,i+1)}).addTo(m)
+        .bindPopup('<strong style="font-size:13px">'+p.n+'</strong>');
+    });
+    setTimeout(function(){ m.invalidateSize(); }, 400);
+  }
+  aMap('map-nw',[20.90,-156.67],13,[
+    {ll:[20.9260,-156.6927],n:'Sheraton Maui',col:'#d53f8c'},
+    {ll:[20.9341,-156.6944],n:'Skyline Zipline',col:'#0077b6'},
+    {ll:[20.8763,-156.6793],n:'Downtown Lahaina',col:'#0077b6'},
+    {ll:[20.8820,-156.6740],n:"Ululani's Shaved Ice",col:'#38a169'},
+    {ll:[20.8794,-156.6769],n:'Safeway Lahaina',col:'#38a169'},
+    {ll:[20.8140,-156.6473],n:"Leoda's Kitchen",col:'#38a169'}]);
+  aMap('map-sw',[20.72,-156.44],12,[
+    {ll:[20.7927,-156.5063],n:'Maalaea Harbor',col:'#0077b6'},
+    {ll:[20.7600,-156.4484],n:'Kihei Town',col:'#0077b6'},
+    {ll:[20.7478,-156.4441],n:"Ululani's Shaved Ice",col:'#38a169'},
+    {ll:[20.6386,-156.4418],n:'Turtle Town',col:'#d53f8c'},
+    {ll:[20.6278,-156.4364],n:'Makena Big Beach',col:'#d53f8c'}]);
+  aMap('map-hana',[20.83,-156.15],10,[
+    {ll:[20.9161,-156.3762],n:'Paia Town',col:'#38a169'},
+    {ll:[20.9358,-156.3562],n:"Ho'okipa Beach",col:'#d53f8c'},
+    {ll:[20.9291,-156.3558],n:"Mama's Fish House",col:'#d53f8c'},
+    {ll:[20.9046,-156.2499],n:'Twin Falls',col:'#0077b6'},
+    {ll:[20.8831,-156.2037],n:'Garden of Eden',col:'#d53f8c'},
+    {ll:[20.8393,-156.0744],n:"Aunty Sandy's Banana Bread",col:'#38a169'},
+    {ll:[20.7734,-155.9900],n:'Black Sand Beach',col:'#0077b6'},
+    {ll:[20.7621,-155.9893],n:'Hana Town',col:'#0077b6'},
+    {ll:[20.6659,-156.0425],n:'Seven Sacred Pools',col:'#0077b6'}]);
+  aMap('map-central',[20.89,-156.49],12,[
+    {ll:[20.8986,-156.4306],n:'Kahului Airport OGG',col:'#dd6b20'},
+    {ll:[20.8797,-156.5486],n:'Iao Valley',col:'#0077b6'},
+    {ll:[20.8896,-156.4696],n:'Kahului (Gas + Stores)',col:'#38a169'}]);
+  aMap('map-upcountry',[20.78,-156.33],12,[
+    {ll:[20.7714,-156.3394],n:'Upcountry Farmers Market',col:'#38a169'},
+    {ll:[20.7607,-156.3298],n:"Ali'i Kula Lavender Farm",col:'#805ad5'},
+    {ll:[20.7468,-156.3225],n:'Surfing Goat Dairy',col:'#38a169'},
+    {ll:[20.8573,-156.3100],n:'Makawao Town',col:'#0077b6'}]);
+}
 
-    var keys=['day1','day2','day3','day4','day5','areas','notes'];
-    for(var i=1;i<=7;i++){
-      (function(idx){
-        var el=document.getElementById('r'+idx);
-        if(el) el.addEventListener('change',function(){
-          renderMain(keys[idx-1]);
-          setTimeout(function(){mainMap.invalidateSize();},100);
-          if(keys[idx-1]==='areas'&&!areaDone){areaDone=true;setTimeout(initArea,300);}
-        });
-      })(i);
-    }
-
-    function aMap(id,center,zoom,pins){
-      if(!document.getElementById(id))return;
-      var m=L.map(id,{zoomControl:true,attributionControl:false});
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(m);
-      m.setView(center,zoom);
-      pins.forEach(function(p,i){
-        L.marker(p.ll,{icon:ico(p.col,i+1)}).addTo(m)
-          .bindPopup('<strong style="font-size:13px">'+p.n+'</strong>');
-      });
-      setTimeout(function(){m.invalidateSize();},400);
-    }
-
-    function initArea(){
-      aMap('map-nw',[20.90,-156.67],13,[
-        {ll:[20.9260,-156.6927],n:'Sheraton Maui',col:'#d53f8c'},
-        {ll:[20.9341,-156.6944],n:'Skyline Zipline',col:'#0077b6'},
-        {ll:[20.8763,-156.6793],n:'Downtown Lahaina',col:'#0077b6'},
-        {ll:[20.8820,-156.6740],n:"Ululani's Shaved Ice",col:'#38a169'},
-        {ll:[20.8794,-156.6769],n:'Safeway Lahaina',col:'#38a169'},
-        {ll:[20.8140,-156.6473],n:"Leoda's Kitchen",col:'#38a169'}]);
-      aMap('map-sw',[20.72,-156.44],12,[
-        {ll:[20.7927,-156.5063],n:'Maalaea Harbor + Ocean Center',col:'#0077b6'},
-        {ll:[20.7600,-156.4484],n:'Kihei Town',col:'#0077b6'},
-        {ll:[20.7478,-156.4441],n:"Ululani's Shaved Ice",col:'#38a169'},
-        {ll:[20.6386,-156.4418],n:'Turtle Town',col:'#d53f8c'},
-        {ll:[20.6278,-156.4364],n:'Makena Big Beach',col:'#d53f8c'}]);
-      aMap('map-hana',[20.83,-156.15],10,[
-        {ll:[20.9161,-156.3762],n:'Paia Town',col:'#38a169'},
-        {ll:[20.9358,-156.3562],n:"Ho'okipa Beach",col:'#d53f8c'},
-        {ll:[20.9291,-156.3558],n:"Mama's Fish House",col:'#d53f8c'},
-        {ll:[20.9046,-156.2499],n:'Twin Falls',col:'#0077b6'},
-        {ll:[20.8831,-156.2037],n:'Garden of Eden',col:'#d53f8c'},
-        {ll:[20.8393,-156.0744],n:"Aunty Sandy's Banana Bread",col:'#38a169'},
-        {ll:[20.7734,-155.9900],n:'Black Sand Beach',col:'#0077b6'},
-        {ll:[20.7621,-155.9893],n:'Hana Town',col:'#0077b6'},
-        {ll:[20.6659,-156.0425],n:'Seven Sacred Pools',col:'#0077b6'}]);
-      aMap('map-central',[20.89,-156.49],12,[
-        {ll:[20.8986,-156.4306],n:'Kahului Airport OGG',col:'#dd6b20'},
-        {ll:[20.8797,-156.5486],n:'Iao Valley',col:'#0077b6'},
-        {ll:[20.8896,-156.4696],n:'Kahului (Gas + Stores)',col:'#38a169'}]);
-      aMap('map-upcountry',[20.78,-156.33],12,[
-        {ll:[20.7714,-156.3394],n:'Upcountry Farmers Market',col:'#38a169'},
-        {ll:[20.7607,-156.3298],n:"Ali'i Kula Lavender Farm",col:'#805ad5'},
-        {ll:[20.7468,-156.3225],n:'Surfing Goat Dairy',col:'#38a169'},
-        {ll:[20.8573,-156.3100],n:'Makawao Town',col:'#0077b6'}]);
-    }
-  } catch(e){ console.log('Map unavailable:',e); }
-})();
+// ── INIT MAIN MAP ────────────────────────────────
+try {
+  if (typeof L !== 'undefined') {
+    G.map = L.map('map', {zoomControl:true, attributionControl:false});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(G.map);
+    L.control.attribution({prefix:'© <a href="https://openstreetmap.org">OSM</a>'}).addTo(G.map);
+    document.getElementById('map').innerHTML = '';
+    mapShow('day1');
+    setTimeout(function(){ G.map.invalidateSize(); }, 300);
+    G.ready = true;
+  }
+} catch(e) { console.log('Map unavailable:', e); }
 </script>
 </body>
 </html>
