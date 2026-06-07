@@ -1,4 +1,4 @@
-const CACHE = 'maui-2026-v2';
+const CACHE = 'maui-2026-v4';
 const CORE = ['/maui-trip/', '/maui-trip/index.html'];
 
 self.addEventListener('install', e => {
