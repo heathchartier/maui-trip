@@ -5,156 +5,150 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>Maui Family Trip — June 10–14, 2026</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f4f8;color:#1a202c;font-size:15px;}
 
-/* ── HEADER ── */
-.header{background:linear-gradient(135deg,#005f8e 0%,#0096c7 60%,#48cae4 100%);color:white;padding:18px 20px 14px;print-color-adjust:exact;-webkit-print-color-adjust:exact;}
-.header h1{font-size:22px;font-weight:800;}
-.header p{font-size:13px;opacity:0.88;margin-top:5px;line-height:1.5;}
-.birthday-pill{display:inline-block;background:rgba(255,255,255,0.25);border:1px solid rgba(255,255,255,0.5);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;margin-top:8px;}
+/* HEADER */
+.header{background:linear-gradient(135deg,#005f8e,#0096c7 60%,#48cae4);color:#fff;padding:16px 18px 14px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+.header h1{font-size:21px;font-weight:800;}
+.header p{font-size:13px;opacity:.88;margin-top:4px;line-height:1.5;}
+.bday-pill{display:inline-block;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.45);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;margin-top:7px;}
 
-/* ── MOBILE TIP BANNER ── */
-.mobile-tip{background:#1a202c;color:#e2e8f0;font-size:12px;padding:8px 14px;text-align:center;line-height:1.5;}
-.mobile-tip strong{color:#48cae4;}
+/* OFFLINE BANNER */
+.banner{background:#0f172a;color:#94a3b8;font-size:12px;padding:7px 14px;text-align:center;line-height:1.5;}
+.banner strong{color:#38bdf8;}
 
-/* ══════════════════════════════════════════
-   CSS-ONLY TABS — radio inputs power the tabs
-   Works with zero JavaScript
-   ══════════════════════════════════════════ */
-.tab-inputs{display:none;}
+/* ════════════════════════════════════════
+   CSS-ONLY TABS
+   Inputs, tab-bar, and content-grid are
+   ALL direct children of .app — so the
+   general-sibling selector ~ works correctly
+   ════════════════════════════════════════ */
+.tab-r{display:none !important;}
 
-.tab-bar{display:flex;overflow-x:auto;background:white;border-bottom:2px solid #e2e8f0;-webkit-overflow-scrolling:touch;}
+.tab-bar{display:flex;overflow-x:auto;background:#fff;border-bottom:2px solid #e2e8f0;-webkit-overflow-scrolling:touch;}
 .tab-bar::-webkit-scrollbar{height:3px;}
+.tab-lbl{padding:12px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;color:#718096;flex-shrink:0;-webkit-tap-highlight-color:transparent;}
 
-.tab-label{padding:12px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;color:#718096;flex-shrink:0;display:block;user-select:none;}
-.tab-label:hover{color:#0077b6;}
-
-/* Show active tab style */
+/* Active tab */
 #r1:checked ~ .tab-bar label[for=r1],
 #r2:checked ~ .tab-bar label[for=r2],
 #r3:checked ~ .tab-bar label[for=r3],
 #r4:checked ~ .tab-bar label[for=r4],
 #r5:checked ~ .tab-bar label[for=r5],
 #r6:checked ~ .tab-bar label[for=r6],
-#r7:checked ~ .tab-bar label[for=r7]
-{color:#0077b6;border-bottom-color:#0077b6;}
+#r7:checked ~ .tab-bar label[for=r7]{color:#0077b6;border-bottom-color:#0077b6;}
 
-/* Hide all panels */
+/* Hide all panels by default */
 .day-panel{display:none;}
 
-/* Show active panel */
-#r1:checked ~ .panels #day1,
-#r2:checked ~ .panels #day2,
-#r3:checked ~ .panels #day3,
-#r4:checked ~ .panels #day4,
-#r5:checked ~ .panels #day5,
-#r6:checked ~ .panels #areas,
-#r7:checked ~ .panels #notes
-{display:block;}
+/* Show the selected panel */
+#r1:checked ~ .content-grid #day1,
+#r2:checked ~ .content-grid #day2,
+#r3:checked ~ .content-grid #day3,
+#r4:checked ~ .content-grid #day4,
+#r5:checked ~ .content-grid #day5,
+#r6:checked ~ .content-grid #areas,
+#r7:checked ~ .content-grid #notes{display:block;}
 
-/* ── MAP ── */
-#map{height:300px;width:100%;background:#d4e9f7;}
-.map-placeholder{display:flex;align-items:center;justify-content:center;height:300px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:#3b82f6;font-size:14px;font-weight:600;text-align:center;padding:20px;}
+/* LAYOUT */
+.app{display:flex;flex-direction:column;}
+.content-grid{display:flex;flex-direction:column;min-height:0;}
+#map{height:300px;width:100%;background:#cce5f5;flex-shrink:0;}
+.map-msg{display:flex;align-items:center;justify-content:center;height:300px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:#3b82f6;font-size:13px;font-weight:600;text-align:center;padding:20px;}
+.panel-wrap{overflow-y:auto;padding:13px 13px 80px;-webkit-overflow-scrolling:touch;}
 
-/* ── LAYOUT ── */
-.panel-wrap{overflow-y:auto;padding:14px 14px 80px;}
+@media(min-width:768px){
+  .content-grid{flex-direction:row;height:calc(100vh - 115px);}
+  .map-col{flex:1;position:relative;min-width:0;}
+  #map{height:100%;}
+  .panel-wrap{width:430px;flex-shrink:0;height:100%;}
+}
 
-/* ── DAY HEADER ── */
-.day-header{background:white;border-radius:12px;padding:14px 16px;margin-bottom:12px;border-left:5px solid #0077b6;box-shadow:0 1px 4px rgba(0,0,0,0.07);}
-.day-header .date-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#718096;}
-.day-header h2{font-size:19px;font-weight:800;margin:4px 0 5px;}
-.day-header .route-line{font-size:13px;color:#4a5568;line-height:1.5;}
-.day-header .route-line span{color:#0077b6;font-weight:600;}
+/* DAY HEADER */
+.day-hdr{background:#fff;border-radius:12px;padding:13px 15px;margin-bottom:11px;border-left:5px solid #0077b6;box-shadow:0 1px 4px rgba(0,0,0,.07);}
+.day-hdr .dlabel{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#718096;}
+.day-hdr h2{font-size:18px;font-weight:800;margin:3px 0 4px;}
+.day-hdr .route{font-size:13px;color:#4a5568;line-height:1.5;}
+.day-hdr .route span{color:#0077b6;font-weight:600;}
 
-/* ── ALERTS ── */
-.alert{background:#fffaf0;border:1px solid #f6ad55;border-radius:10px;padding:11px 14px;margin-bottom:10px;font-size:13px;line-height:1.5;}
+/* ALERTS */
+.alert{background:#fffaf0;border:1px solid #f6ad55;border-radius:10px;padding:10px 13px;margin-bottom:10px;font-size:13px;line-height:1.5;}
 .alert strong{color:#c05621;}
 .alert.info{background:#ebf8ff;border-color:#90cdf4;}
 .alert.info strong{color:#2b6cb0;}
 
-/* ── STOP CARD ── */
-.stop-card{background:white;border-radius:12px;padding:13px 14px;margin-bottom:10px;display:flex;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);}
-.stop-badge{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;margin-top:1px;color:white;}
-.b-blue{background:#0077b6;}.b-green{background:#38a169;}.b-pink{background:#d53f8c;}.b-orange{background:#dd6b20;}.b-purple{background:#805ad5;}
-.stop-info{flex:1;min-width:0;}
-.stop-info .stop-time{font-size:12px;color:#0077b6;font-weight:700;margin-bottom:3px;}
-.stop-info h3{font-size:15px;font-weight:700;margin-bottom:5px;}
-.stop-info p{font-size:13px;color:#4a5568;line-height:1.55;}
+/* STOP CARD */
+.card{background:#fff;border-radius:12px;padding:12px 13px;margin-bottom:9px;display:flex;gap:11px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.badge{width:29px;height:29px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;margin-top:1px;color:#fff;}
+.bb{background:#0077b6;}.bg{background:#38a169;}.bp{background:#d53f8c;}.bo{background:#dd6b20;}.bv{background:#805ad5;}
+.ci{flex:1;min-width:0;}
+.ci .tm{font-size:12px;color:#0077b6;font-weight:700;margin-bottom:2px;}
+.ci h3{font-size:14px;font-weight:700;margin-bottom:4px;}
+.ci p{font-size:13px;color:#4a5568;line-height:1.55;}
 
-/* ── TAGS ── */
-.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px;}
-.tag{font-size:11px;padding:2px 9px;border-radius:20px;font-weight:600;}
-.t-blue{background:#ebf8ff;color:#2b6cb0;}.t-green{background:#f0fff4;color:#276749;}.t-orange{background:#fffaf0;color:#c05621;}.t-pink{background:#fff5f7;color:#97266d;}.t-purple{background:#faf5ff;color:#553c9a;}
+/* TAGS */
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.tag{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;}
+.tb{background:#ebf8ff;color:#2b6cb0;}.tg{background:#f0fff4;color:#276749;}.to{background:#fffaf0;color:#c05621;}.tp{background:#fff5f7;color:#97266d;}.tv{background:#faf5ff;color:#553c9a;}
 
-/* ── NAV BUTTONS ── */
-.nav-btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
-.nav-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;flex-shrink:0;}
-.nav-apple{background:#1c1c1e;color:white;}
-.nav-google{background:#4285f4;color:white;}
-.nav-waze{background:#05c8f7;color:#1a202c;}
-.nav-btn:hover{opacity:0.85;}
+/* NAV BUTTONS */
+.navs{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;}
+.nb{display:inline-flex;align-items:center;gap:4px;padding:6px 11px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;}
+.na{background:#1c1c1e;color:#fff;}
+.ng{background:#4285f4;color:#fff;}
+.nw{background:#05c8f7;color:#111;}
 
-/* ── SECTION TITLE ── */
-.section-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#a0aec0;margin:16px 0 8px 2px;}
+/* SECTION LABEL */
+.slabel{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#a0aec0;margin:15px 0 7px 2px;}
 
-/* ── BIRTHDAY BOX ── */
-.birthday-box{background:linear-gradient(135deg,#f687b3,#9f7aea);color:white;border-radius:14px;padding:15px 16px;margin-bottom:12px;print-color-adjust:exact;-webkit-print-color-adjust:exact;}
-.birthday-box h3{font-size:16px;font-weight:800;margin-bottom:8px;}
-.birthday-box ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:4px;}
-.birthday-box li{font-size:12px;font-weight:600;}
-.birthday-box li::before{content:"✓ ";}
+/* BIRTHDAY BOX */
+.bday{background:linear-gradient(135deg,#f687b3,#9f7aea);color:#fff;border-radius:13px;padding:14px 15px;margin-bottom:11px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+.bday h3{font-size:15px;font-weight:800;margin-bottom:7px;}
+.bday ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:3px;}
+.bday li{font-size:12px;font-weight:600;}
+.bday li::before{content:"✓ ";}
 
-/* ── SUGGESTIONS ── */
-.suggestions-box{background:white;border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.07);}
-.suggestions-box h3{font-size:15px;font-weight:700;margin-bottom:10px;}
-.suggest-item{padding:10px 0;border-bottom:1px solid #f7fafc;}
-.suggest-item:last-child{border-bottom:none;padding-bottom:0;}
-.suggest-item h4{font-size:14px;font-weight:700;}
-.suggest-item p{font-size:13px;color:#718096;margin-top:2px;line-height:1.45;}
-.swap-label{font-size:11px;font-weight:700;color:#dd6b20;background:#fffaf0;padding:1px 7px;border-radius:20px;display:inline-block;margin-top:4px;}
+/* SUGGESTIONS */
+.sugg{background:#fff;border-radius:12px;padding:13px 15px;margin-bottom:9px;box-shadow:0 1px 3px rgba(0,0,0,.07);}
+.sugg h3{font-size:14px;font-weight:700;margin-bottom:9px;}
+.si{padding:9px 0;border-bottom:1px solid #f7fafc;}
+.si:last-child{border-bottom:none;padding-bottom:0;}
+.si h4{font-size:13px;font-weight:700;}
+.si p{font-size:12px;color:#718096;margin-top:2px;line-height:1.45;}
+.swap{font-size:11px;font-weight:700;color:#dd6b20;background:#fffaf0;padding:1px 7px;border-radius:20px;display:inline-block;margin-top:3px;}
 
-/* ── AREA MAPS ── */
-.area-grid{display:grid;grid-template-columns:1fr;gap:10px;}
-.area-card{background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);}
-.area-card-title{padding:12px 16px;font-weight:800;font-size:14px;border-bottom:1px solid #f0f4f8;}
-.area-map{height:260px;background:#d4e9f7;}
+/* AREA MAP CARDS */
+.area-grid{display:grid;grid-template-columns:1fr;gap:9px;}
+@media(min-width:500px){.area-grid{grid-template-columns:1fr 1fr;}}
+.acard{background:#fff;border-radius:11px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.acard-title{padding:11px 14px;font-weight:800;font-size:13px;border-bottom:1px solid #f0f4f8;}
+.amap{height:240px;background:#cce5f5;}
 
-/* ── BOOKING CARDS ── */
-.booking-card{background:white;border-radius:12px;padding:14px 16px;margin-bottom:10px;border-left:4px solid #dd6b20;box-shadow:0 1px 3px rgba(0,0,0,0.07);}
-.booking-card h3{font-size:15px;font-weight:700;margin-bottom:5px;}
-.urgency{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;padding:2px 8px;border-radius:20px;display:inline-block;margin-bottom:7px;}
-.u-red{background:#fff5f5;color:#c53030;}.u-orange{background:#fffaf0;color:#c05621;}.u-yellow{background:#fffff0;color:#975a16;}
-.booking-card p{font-size:13px;color:#4a5568;line-height:1.55;}
-.booking-card a{color:#0077b6;font-weight:600;text-decoration:none;}
-.note-header{font-size:13px;color:#4a5568;line-height:1.6;background:white;border-radius:12px;padding:14px 16px;margin-bottom:10px;}
+/* BOOKING CARDS */
+.bcard{background:#fff;border-radius:12px;padding:13px 15px;margin-bottom:9px;border-left:4px solid #dd6b20;box-shadow:0 1px 3px rgba(0,0,0,.07);}
+.bcard h3{font-size:14px;font-weight:700;margin-bottom:4px;}
+.urg{font-size:11px;font-weight:800;text-transform:uppercase;padding:2px 7px;border-radius:20px;display:inline-block;margin-bottom:6px;}
+.ur{background:#fff5f5;color:#c53030;}.uo{background:#fffaf0;color:#c05621;}.uy{background:#fffff0;color:#975a16;}
+.bcard p{font-size:13px;color:#4a5568;line-height:1.5;}
+.bcard a{color:#0077b6;font-weight:600;text-decoration:none;}
+.nhdr{font-size:13px;color:#4a5568;line-height:1.6;background:#fff;border-radius:12px;padding:13px 15px;margin-bottom:9px;}
 
-/* ── PRINT FAB ── */
-.print-fab{position:fixed;bottom:22px;right:18px;background:#0077b6;color:white;border:none;width:54px;height:54px;border-radius:50%;font-size:20px;cursor:pointer;box-shadow:0 4px 14px rgba(0,119,182,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;}
+/* PRINT FAB */
+.pfab{position:fixed;bottom:20px;right:16px;background:#0077b6;color:#fff;border:none;width:52px;height:52px;border-radius:50%;font-size:19px;cursor:pointer;box-shadow:0 4px 14px rgba(0,119,182,.45);z-index:9999;display:flex;align-items:center;justify-content:center;}
 
-/* ── RESPONSIVE DESKTOP ── */
-@media(min-width:768px){
-  .main-layout{display:flex;height:calc(100vh - 140px);}
-  #map{width:100%;height:100%;}
-  .map-col{flex:1;position:relative;}
-  .panel-wrap{width:430px;height:100%;overflow-y:auto;flex-shrink:0;}
-  .area-grid{grid-template-columns:1fr 1fr;}
-}
-
-/* ── PRINT ── */
+/* PRINT */
 @media print{
-  .tab-bar,.print-fab,.mobile-tip,.tab-inputs,.map-col{display:none!important;}
-  .main-layout{display:block!important;}
-  .panel-wrap{width:100%!important;padding:0!important;}
+  .banner,.tab-bar,.pfab,.map-col{display:none!important;}
+  .content-grid{display:block!important;}
+  .panel-wrap{overflow:visible;padding:0;}
   .day-panel{display:block!important;page-break-before:always;}
   #day1{page-break-before:auto;}
-  .stop-card,.booking-card{page-break-inside:avoid;margin-bottom:6px;}
-  .nav-btns{display:none!important;}
-  body{background:white;}
-  .birthday-box{print-color-adjust:exact;-webkit-print-color-adjust:exact;}
-  .header{print-color-adjust:exact;-webkit-print-color-adjust:exact;}
+  .card,.bcard{page-break-inside:avoid;}
+  .navs{display:none!important;}
+  body{background:#fff;}
+  .bday,.header{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 }
 </style>
 </head>
@@ -162,906 +156,793 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 <div class="header">
   <h1>🌺 Maui Family Trip</h1>
-  <p>June 10–14, 2026 &nbsp;·&nbsp; 15 People &nbsp;·&nbsp; Ages 5+<br>Sheraton Maui Resort &amp; Spa · Ka'anapali</p>
-  <span class="birthday-pill">🎂 Happy 13th Birthday!</span>
+  <p>June 10–14, 2026 · 15 People · Ages 5+<br>Sheraton Maui Resort &amp; Spa · Ka'anapali</p>
+  <span class="bday-pill">🎂 Happy 13th Birthday!</span>
 </div>
 
-<div class="mobile-tip">
-  📱 <strong>Using on phone from email?</strong> Download the file → open in Safari or Chrome (not inside the email app) for full tabs + maps.
+<div class="banner">
+  📶 <strong>Works offline</strong> once you open the link on WiFi. All tabs &amp; details stay available without signal — great for Road to Hana.
 </div>
 
-<!-- ════════════════════════════════════════════
-     CSS-ONLY TAB SYSTEM
-     Radio inputs drive everything — no JS needed
-     ════════════════════════════════════════════ -->
-<input class="tab-inputs" type="radio" name="days" id="r1" checked>
-<input class="tab-inputs" type="radio" name="days" id="r2">
-<input class="tab-inputs" type="radio" name="days" id="r3">
-<input class="tab-inputs" type="radio" name="days" id="r4">
-<input class="tab-inputs" type="radio" name="days" id="r5">
-<input class="tab-inputs" type="radio" name="days" id="r6">
-<input class="tab-inputs" type="radio" name="days" id="r7">
+<!-- ══════════════════════════════════════════
+     .app wraps everything. The 7 radio inputs,
+     .tab-bar, and .content-grid are ALL direct
+     children of .app so the ~ selector works.
+     ══════════════════════════════════════════ -->
+<div class="app">
 
-<div class="tab-bar">
-  <label class="tab-label" for="r1">Day 1</label>
-  <label class="tab-label" for="r2">Day 2 · Hana</label>
-  <label class="tab-label" for="r3">Day 3</label>
-  <label class="tab-label" for="r4">Day 4</label>
-  <label class="tab-label" for="r5">Day 5</label>
-  <label class="tab-label" for="r6">🗺 Area Maps</label>
-  <label class="tab-label" for="r7">⚠️ Book Now</label>
-</div>
+  <input class="tab-r" type="radio" name="d" id="r1" checked>
+  <input class="tab-r" type="radio" name="d" id="r2">
+  <input class="tab-r" type="radio" name="d" id="r3">
+  <input class="tab-r" type="radio" name="d" id="r4">
+  <input class="tab-r" type="radio" name="d" id="r5">
+  <input class="tab-r" type="radio" name="d" id="r6">
+  <input class="tab-r" type="radio" name="d" id="r7">
 
-<div class="main-layout">
-  <!-- Map column (desktop only — hidden on print) -->
-  <div class="map-col">
-    <div id="map"><div class="map-placeholder">🗺 Map loading…<br><small>Requires internet connection</small></div></div>
+  <div class="tab-bar">
+    <label class="tab-lbl" for="r1">Day 1</label>
+    <label class="tab-lbl" for="r2">Day 2 · Hana</label>
+    <label class="tab-lbl" for="r3">Day 3</label>
+    <label class="tab-lbl" for="r4">Day 4</label>
+    <label class="tab-lbl" for="r5">Day 5</label>
+    <label class="tab-lbl" for="r6">🗺 Area Maps</label>
+    <label class="tab-lbl" for="r7">⚠️ Book Now</label>
   </div>
 
-  <!-- Content panel -->
-  <div class="panel-wrap">
-    <div class="panels">
+  <div class="content-grid">
 
-      <!-- ══════════════ DAY 1 ══════════════ -->
+    <!-- MAP (left on desktop, top on mobile) -->
+    <div class="map-col">
+      <div id="map"><div class="map-msg">🗺 Interactive map<br><small>Requires internet · Tabs work offline</small></div></div>
+    </div>
+
+    <!-- PANELS -->
+    <div class="panel-wrap">
+
+      <!-- ══ DAY 1 ══ -->
       <div id="day1" class="day-panel">
-        <div class="day-header">
-          <div class="date-label">Tuesday · June 10</div>
+        <div class="day-hdr">
+          <div class="dlabel">Tuesday · June 10</div>
           <h2>Arrival Day</h2>
-          <div class="route-line"><span>Airport → Iao Valley → Leoda's → Safeway → Resort → Cliff Dive</span></div>
+          <div class="route"><span>Airport → Iao Valley → Leoda's → Safeway → Resort → Cliff Dive</span></div>
         </div>
+        <div class="alert"><strong>Vehicles:</strong> 15 people = 3 rental cars. Book all 3 now — Maui rentals sell out in June.</div>
 
-        <div class="alert">
-          <strong>Vehicles:</strong> 15 people = 3 rental cars (5 per car). Book all 3 now — Maui rentals sell out in June.
-        </div>
+        <div class="slabel">Morning</div>
 
-        <div class="section-title">Morning — On the Road by Noon</div>
-
-        <div class="stop-card">
-          <div class="stop-badge b-blue">1</div>
-          <div class="stop-info">
-            <div class="stop-time">11:15 AM Land · ~12:15 PM Wheels Rolling</div>
+        <div class="card">
+          <div class="badge bb">1</div>
+          <div class="ci">
+            <div class="tm">11:15 AM Land · ~12:15 PM Wheels Rolling</div>
             <h3>Kahului Airport (OGG) — Arrivals</h3>
-            <p>Budget ~1 hr for deplaning, baggage, and 3 rental car pickups. Set a group text for all 15 people and agree on a convoy plan before leaving the lot.</p>
-            <div class="tags"><span class="tag t-blue">Rental Cars</span><span class="tag t-orange">Coordinate Here</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Kahului+Airport+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Kahului+Airport+Maui+OGG" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Kahului+Airport+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>Budget ~1 hr for deplaning, baggage, and 3 rental car pickups. Set a group text with all 15 before leaving the lot. Agree on a convoy plan.</p>
+            <div class="tags"><span class="tag tb">Rental Cars</span><span class="tag to">Coordinate Here</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Kahului+Airport+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Kahului+Airport+Maui+OGG" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Kahului+Airport+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-blue">2</div>
-          <div class="stop-info">
-            <div class="stop-time">~12:15 PM · 30–45 min visit</div>
+        <div class="card">
+          <div class="badge bb">2</div>
+          <div class="ci">
+            <div class="tm">~12:15 PM · 30–45 min</div>
             <h3>Iao Valley State Monument</h3>
-            <p>Stunning 1,200-ft green needle rising from a lush valley — the perfect "Welcome to Maui" first stop. Easy paved walk, fully accessible for all ages. Free entry. Only 8 miles from the airport.</p>
-            <div class="tags"><span class="tag t-green">All Ages ✓</span><span class="tag t-green">Free</span><span class="tag t-blue">8 mi from Airport</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Iao+Valley+State+Monument+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Iao+Valley+State+Monument+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Iao+Valley+State+Monument+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>Stunning 1,200-ft green needle rising from a lush valley — perfect "Welcome to Maui" stop. Easy paved walk, accessible for all ages. Free entry. Only 8 miles from the airport.</p>
+            <div class="tags"><span class="tag tg">All Ages ✓</span><span class="tag tg">Free</span><span class="tag tb">8 mi from Airport</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Iao+Valley+State+Monument+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Iao+Valley+State+Monument+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Iao+Valley+State+Monument+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="section-title">Lunch + Groceries</div>
+        <div class="slabel">Lunch + Groceries</div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-green">3</div>
-          <div class="stop-info">
-            <div class="stop-time">~1:30 PM</div>
+        <div class="card">
+          <div class="badge bg">3</div>
+          <div class="ci">
+            <div class="tm">~1:30 PM</div>
             <h3>Leoda's Kitchen &amp; Pie Shop</h3>
-            <p>Local favorite in Olowalu — right on Hwy 30 on your way to the resort, zero detour. Famous for pies, pot pies, and sandwiches. Note: this is near Lahaina, not the airport. Arrive by 1:30 PM to beat the wait.</p>
-            <div class="tags"><span class="tag t-green">Lunch</span><span class="tag t-blue">On Route — No Detour</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Leoda%27s+Kitchen+Pie+Shop+Olowalu+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Leoda%27s+Kitchen+Pie+Shop+Olowalu+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Leoda%27s+Kitchen+Olowalu+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>Local favorite in Olowalu — right on Hwy 30 on your route to the resort, no detour. Famous for pies, pot pies, and sandwiches. Arrive by 1:30 PM to beat the wait.</p>
+            <div class="tags"><span class="tag tg">Lunch</span><span class="tag tb">On Route — No Detour</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Leoda%27s+Kitchen+Pie+Shop+Olowalu+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Leoda%27s+Kitchen+Pie+Shop+Olowalu+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Leoda%27s+Kitchen+Olowalu+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-blue">4</div>
-          <div class="stop-info">
-            <div class="stop-time">~3:00 PM</div>
+        <div class="card">
+          <div class="badge bb">4</div>
+          <div class="ci">
+            <div class="tm">~3:00 PM</div>
             <h3>Safeway — Lahaina</h3>
-            <p>1221 Honoapi'ilani Hwy, Lahaina. Best full grocery store close to the resort. Stock up on snacks, drinks, breakfast food, sunscreen, and snorkel gear. Skip Costco — it's back in Kahului, wrong direction.</p>
-            <div class="tags"><span class="tag t-blue">Groceries</span><span class="tag t-green">Near Resort</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Safeway+Lahaina+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Safeway+Lahaina+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Safeway+Lahaina+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>1221 Honoapi'ilani Hwy, Lahaina. Best full grocery store near the resort. Stock up on snacks, drinks, breakfast food, and sunscreen. Skip Costco — it's back in Kahului, wrong direction.</p>
+            <div class="tags"><span class="tag tb">Groceries</span><span class="tag tg">Near Resort</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Safeway+Lahaina+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Safeway+Lahaina+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Safeway+Lahaina+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="section-title">Evening at the Resort</div>
+        <div class="slabel">Evening</div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-blue">5</div>
-          <div class="stop-info">
-            <div class="stop-time">~4:30 PM</div>
+        <div class="card">
+          <div class="badge bb">5</div>
+          <div class="ci">
+            <div class="tm">~4:30 PM</div>
             <h3>Check In — Sheraton Maui Resort</h3>
-            <p>2605 Ka'anapali Pkwy. Unpack and change. The resort sits right on Black Rock (Pu'u Keka'a) — one of Maui's best snorkel spots is steps from your room.</p>
-            <div class="tags"><span class="tag t-blue">Home Base</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Sheraton+Maui+Resort" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Sheraton+Maui+Resort+Kaanapali" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Sheraton+Maui+Resort&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>2605 Ka'anapali Pkwy. Unpack and change. The resort sits right on Black Rock — one of Maui's best snorkel spots is steps from your room.</p>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Sheraton+Maui+Resort" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Sheraton+Maui+Resort+Kaanapali" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Sheraton+Maui+Resort&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-pink">6</div>
-          <div class="stop-info">
-            <div class="stop-time">~Sunset · 6:30–7:30 PM</div>
+        <div class="card">
+          <div class="badge bp">6</div>
+          <div class="ci">
+            <div class="tm">~Sunset · 6:30–7:30 PM</div>
             <h3>Ka'anapali Cliff Dive Ceremony — Black Rock</h3>
-            <p>A free nightly tradition right at your resort. A torch lighter walks the cliff, lights torches, then dives into the ocean — a genuine Hawaiian ceremony. Watch from the beach with a drink in hand. Ask the front desk for exact time (varies by sunset).</p>
-            <div class="tags"><span class="tag t-pink">Must-See</span><span class="tag t-green">Free</span><span class="tag t-green">All Ages</span><span class="tag t-blue">At Resort</span></div>
+            <p>Free nightly tradition right at your resort. A torch lighter walks the cliff, lights torches, then dives into the ocean — a genuine Hawaiian ceremony. Watch from the beach. Ask front desk for exact time.</p>
+            <div class="tags"><span class="tag tp">Must-See</span><span class="tag tg">Free</span><span class="tag tg">All Ages</span><span class="tag tb">At Resort</span></div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-purple">7</div>
-          <div class="stop-info">
-            <div class="stop-time">Evening · Pre-book Required</div>
+        <div class="card">
+          <div class="badge bv">7</div>
+          <div class="ci">
+            <div class="tm">Evening · Pre-book Required</div>
             <h3>Old Lahaina Luau</h3>
-            <p>The best luau on Maui — authentic food, hula, fire knife dance. 10 min from resort. Books out weeks/months ahead. Backup option: Drums of the Pacific at the Hyatt (same Ka'anapali strip). Call ahead for a group of 15.</p>
-            <div class="tags"><span class="tag t-orange">Book in Advance</span><span class="tag t-green">All Ages</span><span class="tag t-pink">Birthday Vibe</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Old+Lahaina+Luau" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Old+Lahaina+Luau" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Old+Lahaina+Luau&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>Best luau on Maui — authentic food, hula, fire knife dance. 10 min from resort. Books out weeks/months ahead. Backup: Drums of the Pacific at the Ka'anapali Hyatt. Call ahead for 15 people.</p>
+            <div class="tags"><span class="tag to">Book in Advance</span><span class="tag tg">All Ages</span><span class="tag tp">Birthday Vibe</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Old+Lahaina+Luau" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Old+Lahaina+Luau" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Old+Lahaina+Luau&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
       </div><!-- /day1 -->
 
-      <!-- ══════════════ DAY 2 ══════════════ -->
+      <!-- ══ DAY 2 ══ -->
       <div id="day2" class="day-panel">
-        <div class="day-header">
-          <div class="date-label">Wednesday · June 11</div>
+        <div class="day-hdr">
+          <div class="dlabel">Wednesday · June 11</div>
           <h2>Road to Hana</h2>
-          <div class="route-line"><span>Resort → Pa'ia → Twin Falls → Garden of Eden → Banana Bread → Black Sand Beach → Hana → Seven Sacred Pools → back</span></div>
+          <div class="route"><span>Resort → Pa'ia → Twin Falls → Garden of Eden → Banana Bread → Black Sand Beach → Hana → Seven Sacred Pools → back</span></div>
         </div>
 
-        <div class="birthday-box">
+        <div class="bday">
           <h3>🎂 Birthday Girl Highlights — Day 2</h3>
           <ul>
-            <li>Açaí bowl in Pa'ia</li>
-            <li>Hana waterfalls</li>
-            <li>Banana bread at mile 18</li>
-            <li>Black sand beach</li>
-            <li>Garden of Eden botanical</li>
-            <li>Chill — no rush today</li>
+            <li>Açaí bowl in Pa'ia</li><li>Hana waterfalls</li>
+            <li>Banana bread mile 18</li><li>Black sand beach</li>
+            <li>Garden of Eden botanical</li><li>No rush — chill day</li>
           </ul>
         </div>
 
-        <div class="alert">
-          <strong>⚠️ RESERVATIONS REQUIRED:</strong> Wai'anapanapa Black Sand Beach = <strong>gostateparks.hawaii.gov</strong> ($15/car). Seven Sacred Pools = <strong>recreation.gov</strong> ($35/car). Both fill up — book before the trip.
-        </div>
+        <div class="alert"><strong>⚠️ RESERVATIONS REQUIRED:</strong> Black Sand Beach → <strong>gostateparks.hawaii.gov</strong> ($15/car). Seven Sacred Pools → <strong>recreation.gov</strong> ($35/car). Both fill up — book before the trip.</div>
+        <div class="alert info"><strong>Depart 7:00 AM sharp.</strong> 620 curves, 59 bridges in 52 miles. Farthest point is Seven Sacred Pools. Full day, 10–12 hours. No rush — explore and enjoy.</div>
 
-        <div class="alert info">
-          <strong>Depart 7:00 AM sharp.</strong> 620 curves, 59 bridges in 52 miles. Farthest point is Seven Sacred Pools (~10 mi past Hana), then head back. Full day — 10 to 12 hours. No rush, just explore and enjoy.
-        </div>
+        <div class="slabel">Morning</div>
 
-        <div class="section-title">Morning</div>
-
-        <div class="stop-card">
-          <div class="stop-badge b-blue">1</div>
-          <div class="stop-info">
-            <div class="stop-time">7:00 AM · Depart Resort</div>
-            <h3>Drive to Pa'ia — Fill Gas in Kahului!</h3>
-            <p>Take Hwy 30 south → Hwy 380 → Hwy 36 east toward Pa'ia. About 45 min. <strong>Fill up in Kahului — there is NO gas station in Hana.</strong></p>
-            <div class="tags"><span class="tag t-orange">Fill Gas in Kahului</span><span class="tag t-orange">No Gas After Pa'ia</span></div>
+        <div class="card">
+          <div class="badge bb">1</div>
+          <div class="ci">
+            <div class="tm">7:00 AM Depart · Fill Gas in Kahului!</div>
+            <h3>Drive to Pa'ia</h3>
+            <p>Hwy 30 south → Hwy 380 → Hwy 36 east. About 45 min. <strong>Fill all 3 vehicles in Kahului — NO gas in Hana.</strong></p>
+            <div class="tags"><span class="tag to">Fill Gas in Kahului</span><span class="tag to">No Gas After Pa'ia</span></div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-green">2</div>
-          <div class="stop-info">
-            <div class="stop-time">~7:50 AM · Breakfast</div>
+        <div class="card">
+          <div class="badge bg">2</div>
+          <div class="ci">
+            <div class="tm">~7:50 AM · Breakfast</div>
             <h3>Pa'ia Town — Breakfast + Açaí Bowl</h3>
-            <p>Best breakfast before the road starts. <strong>Paia Bay Coffee</strong> or <strong>Cafe des Amis</strong> for açaí bowls. Birthday girl must-stop. Load up on snacks and water here — stores disappear after this point.</p>
-            <div class="tags"><span class="tag t-green">Açaí Bowl ✓</span><span class="tag t-pink">Birthday Pick</span><span class="tag t-orange">Get Snacks Here</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Paia+Town+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Paia+Town+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Paia+Town+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>Paia Bay Coffee or Cafe des Amis for açaí bowls. Birthday girl's first must-stop. <strong>Load up on snacks and water here</strong> — stores disappear after this point.</p>
+            <div class="tags"><span class="tag tg">Açaí Bowl ✓</span><span class="tag tp">Birthday Pick</span><span class="tag to">Buy Snacks &amp; Water Here</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Paia+Town+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Paia+Town+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Paia+Town+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-blue">3</div>
-          <div class="stop-info">
-            <div class="stop-time">~9:00 AM · Mile Marker 2 · 20 min</div>
+        <div class="card">
+          <div class="badge bb">3</div>
+          <div class="ci">
+            <div class="tm">~9:00 AM · Mile Marker 2 · 20 min</div>
             <h3>Twin Falls</h3>
-            <p>Easy 5-min walk to twin waterfalls through bamboo forest. Great for all ages in the group. Often the best photo stop of the whole trip. Small donation asked at trailhead.</p>
-            <div class="tags"><span class="tag t-green">All Ages ✓</span><span class="tag t-blue">Waterfall</span><span class="tag t-blue">Easy Walk</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Twin+Falls+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Twin+Falls+Road+to+Hana+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Twin+Falls+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>Easy 5-min walk to twin waterfalls through bamboo forest. Accessible for all ages. Often the best photo stop of the trip. Small donation asked at trailhead.</p>
+            <div class="tags"><span class="tag tg">All Ages ✓</span><span class="tag tb">Waterfall</span><span class="tag tg">Free</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Twin+Falls+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Twin+Falls+Road+to+Hana+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Twin+Falls+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-pink">4</div>
-          <div class="stop-info">
-            <div class="stop-time">~10:00 AM · Mile Marker 10 · 45–60 min</div>
+        <div class="card">
+          <div class="badge bp">4</div>
+          <div class="ci">
+            <div class="tm">~10:00 AM · Mile Marker 10 · 45–60 min</div>
             <h3>Garden of Eden Arboretum</h3>
-            <p>26-acre botanical garden with waterfalls, peacocks, and ocean views. Perfect botanical stop for the birthday girl. $20/person; kids under 5 free. Paved paths — accessible for everyone.</p>
-            <div class="tags"><span class="tag t-pink">Birthday Botanical ✓</span><span class="tag t-green">All Ages</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Garden+of+Eden+Arboretum+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Garden+of+Eden+Arboretum+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Garden+of+Eden+Arboretum+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>26-acre botanical garden with waterfalls, peacocks, and ocean views. Perfect botanical stop for the birthday girl! $20/person; kids under 5 free. Paved paths — accessible for everyone.</p>
+            <div class="tags"><span class="tag tp">Birthday Botanical ✓</span><span class="tag tg">All Ages</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Garden+of+Eden+Arboretum+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Garden+of+Eden+Arboretum+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Garden+of+Eden+Arboretum+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-green">5</div>
-          <div class="stop-info">
-            <div class="stop-time">~11:15 AM · Mile Marker 18 · Quick Stop</div>
+        <div class="card">
+          <div class="badge bg">5</div>
+          <div class="ci">
+            <div class="tm">~11:15 AM · Mile Marker 18 · Quick Stop</div>
             <h3>Aunty Sandy's Banana Bread</h3>
-            <p>THE banana bread of Road to Hana — baked fresh daily, often sold out by noon. Hot out of the oven, eaten roadside. Lines can be long; totally worth it. Grab one loaf per family.</p>
-            <div class="tags"><span class="tag t-green">Banana Bread ✓</span><span class="tag t-pink">Birthday Must</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Aunty+Sandy%27s+Banana+Bread+Keanae+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Aunty+Sandy%27s+Banana+Bread+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Aunty+Sandy%27s+Banana+Bread+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>THE banana bread of Road to Hana — baked fresh daily, often sold out by noon. Hot out of the oven, eaten roadside. Worth every minute in line. Grab one loaf per family.</p>
+            <div class="tags"><span class="tag tg">Banana Bread ✓</span><span class="tag tp">Birthday Must</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Aunty+Sandy%27s+Banana+Bread+Keanae+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Aunty+Sandy%27s+Banana+Bread+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Aunty+Sandy%27s+Banana+Bread+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="section-title">Afternoon</div>
+        <div class="slabel">Afternoon</div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-pink">6</div>
-          <div class="stop-info">
-            <div class="stop-time">~1:00 PM · Mile Marker 32 · 45 min</div>
-            <h3>Wai'anapanapa State Park — Black Sand Beach</h3>
-            <p>Dramatic black volcanic sand with sea caves and blowholes. Stunning photos. Waves are often rough — swimming not always safe, but exploring the caves is excellent. <strong>Timed entry reservation required — book before the trip at gostateparks.hawaii.gov.</strong></p>
-            <div class="tags"><span class="tag t-pink">Black Sand Beach ✓</span><span class="tag t-orange">Reservation Required</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Waianapanapa+State+Park+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Waianapanapa+State+Park+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Waianapanapa+State+Park+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+        <div class="card">
+          <div class="badge bp">6</div>
+          <div class="ci">
+            <div class="tm">~1:00 PM · Mile Marker 32 · 45 min</div>
+            <h3>Wai'anapanapa — Black Sand Beach</h3>
+            <p>Dramatic black volcanic sand with sea caves and blowholes. Waves often rough — swimming not always safe, but exploring caves is excellent. <strong>Timed entry reservation required — gostateparks.hawaii.gov.</strong></p>
+            <div class="tags"><span class="tag tp">Black Sand Beach ✓</span><span class="tag to">Reservation Required</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Waianapanapa+State+Park+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Waianapanapa+State+Park+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Waianapanapa+State+Park+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-green">7</div>
-          <div class="stop-info">
-            <div class="stop-time">~2:30 PM · Hana Town · 30–45 min</div>
+        <div class="card">
+          <div class="badge bg">7</div>
+          <div class="ci">
+            <div class="tm">~2:30 PM · Hana Town · 30–45 min</div>
             <h3>Hana Town — Lunch + Shaved Ice</h3>
-            <p><strong>Hana Fresh Market</strong> for açaí bowls and local plates, or grab fish tacos from a roadside stand. Shaved ice is available in town. Rest before the final push to the pools.</p>
-            <div class="tags"><span class="tag t-green">Lunch</span><span class="tag t-pink">Shaved Ice</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Hana+Town+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Hana+Town+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Hana+Town+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>Hana Fresh Market for açaí bowls and local plates. Shaved ice available in town. Rest and recharge before the pools.</p>
+            <div class="tags"><span class="tag tg">Lunch</span><span class="tag tp">Shaved Ice</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Hana+Town+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Hana+Town+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Hana+Town+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-blue">8</div>
-          <div class="stop-info">
-            <div class="stop-time">~3:30 PM · Mile Marker 42 · 1 hr</div>
-            <h3>Seven Sacred Pools (Ohe'o Gulch) — Haleakalā NP</h3>
-            <p>Cascading freshwater pools flowing down to the ocean — truly magical. Short flat trail. Swimming allowed when levels are safe (rangers advise). Farthest point of the day. <strong>NPS reservation required at recreation.gov ($35/car).</strong></p>
-            <div class="tags"><span class="tag t-blue">Pools + Waterfalls</span><span class="tag t-orange">NPS Reservation Required</span><span class="tag t-green">All Ages</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Oheo+Gulch+Seven+Pools+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Oheo+Gulch+Seven+Sacred+Pools+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Oheo+Gulch+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+        <div class="card">
+          <div class="badge bb">8</div>
+          <div class="ci">
+            <div class="tm">~3:30 PM · Mile Marker 42 · 1 hr</div>
+            <h3>Seven Sacred Pools (Ohe'o Gulch)</h3>
+            <p>Cascading freshwater pools flowing to the ocean. Short flat trail, all ages. Swimming when safe (rangers advise). Farthest point of the day. <strong>NPS reservation required — recreation.gov ($35/car).</strong></p>
+            <div class="tags"><span class="tag tb">Pools + Waterfalls</span><span class="tag to">NPS Reservation Required</span><span class="tag tg">All Ages</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Oheo+Gulch+Seven+Pools+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Oheo+Gulch+Seven+Sacred+Pools+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Oheo+Gulch+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-orange">9</div>
-          <div class="stop-info">
-            <div class="stop-time">~5:00 PM · Head Back</div>
+        <div class="card">
+          <div class="badge bo">9</div>
+          <div class="ci">
+            <div class="tm">~5:00 PM · Head Back</div>
             <h3>Return to Ka'anapali</h3>
             <p>Same road back through Pa'ia, then west. About 2.5–3 hrs. Stop for dinner in Pa'ia or Lahaina. Arrive resort ~8–8:30 PM.</p>
-            <div class="tags"><span class="tag t-blue">Same Road Back</span><span class="tag t-orange">~3 hr drive</span></div>
+            <div class="tags"><span class="tag tb">Same Road Back</span><span class="tag to">~3 hr drive</span></div>
           </div>
         </div>
 
-        <div class="alert">
-          <strong>Note on Olivine Pools:</strong> These are on the northwest coast — NOT on Road to Hana. The terrain is cliff-edge rough and not safe for young kids or seniors. Replaced here with Seven Sacred Pools, which is far better for your group.
-        </div>
+        <div class="alert"><strong>Note on Olivine Pools:</strong> These are on the northwest coast — NOT on Road to Hana. Cliff-edge rough terrain, not safe for young kids or seniors. Replaced with Seven Sacred Pools, far better for your group.</div>
       </div><!-- /day2 -->
 
-      <!-- ══════════════ DAY 3 ══════════════ -->
+      <!-- ══ DAY 3 ══ -->
       <div id="day3" class="day-panel">
-        <div class="day-header">
-          <div class="date-label">Thursday · June 12</div>
+        <div class="day-hdr">
+          <div class="dlabel">Thursday · June 12</div>
           <h2>South Maui</h2>
-          <div class="route-line"><span>Resort → Ma'alaea → Kihei → Turtle Town → Makena → Shaved Ice → Pizza on the Beach</span></div>
+          <div class="route"><span>Resort → Ma'alaea → Kihei → Turtle Town → Makena → Shaved Ice → Pizza on the Beach</span></div>
         </div>
+        <div class="alert"><strong>Whale Watching Note:</strong> Peak humpback season is Jan–Apr. By June most have migrated north. Call Pacific Whale Foundation before booking to confirm June sightings.</div>
 
-        <div class="alert">
-          <strong>Whale Watching Note:</strong> Peak humpback season is January–April. By June most have migrated north. Call <strong>Pacific Whale Foundation</strong> before booking to confirm June sightings are happening.
-        </div>
+        <div class="slabel">Morning</div>
 
-        <div class="section-title">Morning</div>
-
-        <div class="stop-card">
-          <div class="stop-badge b-blue">1</div>
-          <div class="stop-info">
-            <div class="stop-time">7:30 AM · Pre-book in advance</div>
+        <div class="card">
+          <div class="badge bb">1</div>
+          <div class="ci">
+            <div class="tm">7:30 AM · Pre-book in advance</div>
             <h3>Molokini Snorkel Cruise — Ma'alaea Harbor</h3>
-            <p>#1 snorkel experience on Maui — a submerged volcanic crater with 150 ft visibility and 250+ fish species. Half-day trip (6–11 AM). Book through <strong>Pride of Maui</strong> or <strong>Maui Magic</strong>. Stable boats, great for all ages including the youngest.</p>
-            <div class="tags"><span class="tag t-blue">Snorkel</span><span class="tag t-green">All Ages ✓</span><span class="tag t-orange">Book in Advance</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Maalaea+Harbor+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Maalaea+Harbor+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Maalaea+Harbor+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>#1 snorkel on Maui — submerged volcanic crater, 150 ft visibility, 250+ fish species. Half-day trip. Book through Pride of Maui or Maui Magic. Stable boats, great for all ages. Call direct for group rate on 15.</p>
+            <div class="tags"><span class="tag tb">Snorkel</span><span class="tag tg">All Ages ✓</span><span class="tag to">Book in Advance</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Maalaea+Harbor+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Maalaea+Harbor+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Maalaea+Harbor+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-blue">2</div>
-          <div class="stop-info">
-            <div class="stop-time">~10:00 AM · If skipping Molokini</div>
+        <div class="card">
+          <div class="badge bb">2</div>
+          <div class="ci">
+            <div class="tm">~10:00 AM · If skipping Molokini</div>
             <h3>Maui Ocean Center — Ma'alaea</h3>
-            <p>World-class aquarium — walk through an underwater tunnel with sharks and rays. 60+ exhibits. The youngest members of the group will love it. Open 9 AM–5 PM. ~$35/adult. Great backup if snorkel tour is full or weather is rough.</p>
-            <div class="tags"><span class="tag t-green">Kids Love It</span><span class="tag t-blue">Aquarium</span><span class="tag t-orange">Backup Option</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Maui+Ocean+Center" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Maui+Ocean+Center" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Maui+Ocean+Center&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>World-class aquarium — underwater tunnel with sharks and rays. Great for the youngest kids. ~$35/adult. Good backup if snorkel tour is full or weather is rough.</p>
+            <div class="tags"><span class="tag tg">Kids Love It</span><span class="tag tb">Aquarium</span><span class="tag to">Backup Option</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Maui+Ocean+Center" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Maui+Ocean+Center" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Maui+Ocean+Center&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="section-title">Afternoon</div>
+        <div class="slabel">Afternoon</div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-green">3</div>
-          <div class="stop-info">
-            <div class="stop-time">~12:00 PM · Lunch</div>
-            <h3>Kihei Town — Lunch</h3>
-            <p><strong>Five Palms</strong> for oceanfront seating or <strong>Coconut's Fish Cafe</strong> for the best fish tacos. Kalama Park beach is right here for the kids to play while you eat.</p>
-            <div class="tags"><span class="tag t-green">Food</span><span class="tag t-blue">Beach Access</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Kihei+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Kihei+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Kihei+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+        <div class="card">
+          <div class="badge bg">3</div>
+          <div class="ci">
+            <div class="tm">~12:00 PM</div>
+            <h3>Kihei — Lunch</h3>
+            <p>Five Palms for oceanfront tables or Coconut's Fish Cafe for the best fish tacos. Kalama Park beach is right here for kids to play while you eat.</p>
+            <div class="tags"><span class="tag tg">Food</span><span class="tag tb">Beach Access</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Kihei+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Kihei+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Kihei+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-pink">4</div>
-          <div class="stop-info">
-            <div class="stop-time">~1:30 PM · 30–60 min</div>
+        <div class="card">
+          <div class="badge bp">4</div>
+          <div class="ci">
+            <div class="tm">~1:30 PM · 30–60 min</div>
             <h3>Turtle Town — Maluaka Beach, Makena</h3>
-            <p>Best spot on Maui to snorkel with Hawaiian green sea turtles right in the shallows. Free, bring or rent gear in Kihei. Stay 10 ft from turtles (it's the law). Easy beach entry.</p>
-            <div class="tags"><span class="tag t-pink">Turtles ✓</span><span class="tag t-blue">Snorkel</span><span class="tag t-green">Free</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Maluaka+Beach+Makena+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Maluaka+Beach+Makena+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Maluaka+Beach+Makena+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>Best spot on Maui to snorkel with Hawaiian green sea turtles in the shallows. Free, bring or rent gear in Kihei. Stay 10 ft from turtles — it's the law. Easy beach entry.</p>
+            <div class="tags"><span class="tag tp">Turtles ✓</span><span class="tag tb">Snorkel</span><span class="tag tg">Free</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Maluaka+Beach+Makena+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Maluaka+Beach+Makena+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Maluaka+Beach+Makena+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-blue">5</div>
-          <div class="stop-info">
-            <div class="stop-time">~3:00 PM</div>
+        <div class="card">
+          <div class="badge bb">5</div>
+          <div class="ci">
+            <div class="tm">~3:00 PM</div>
             <h3>Makena Big Beach (Oneloa)</h3>
-            <p>One of Hawaii's most beautiful beaches — 3,000 ft of wide golden sand with crystal water. Relax, play, take photos. Waves can be powerful — supervise young kids. Note: Little Beach (around the rocks) is clothing-optional.</p>
-            <div class="tags"><span class="tag t-blue">Beach</span><span class="tag t-green">Stunning Views</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Makena+Big+Beach+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Makena+Big+Beach+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Makena+Big+Beach+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>One of Hawaii's most beautiful beaches — 3,000 ft of golden sand. Waves can be powerful, supervise young kids. Relax, play, take photos.</p>
+            <div class="tags"><span class="tag tb">Beach</span><span class="tag tg">Stunning Views</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Makena+Big+Beach+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Makena+Big+Beach+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Makena+Big+Beach+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-pink">6</div>
-          <div class="stop-info">
-            <div class="stop-time">~4:30 PM</div>
+        <div class="card">
+          <div class="badge bp">6</div>
+          <div class="ci">
+            <div class="tm">~4:30 PM</div>
             <h3>Ululani's Hawaiian Shaved Ice — Kihei</h3>
-            <p>Best shaved ice in Hawaii — real fruit syrups, mochi, cream, azuki beans. Kihei location is right on the way back. Also in Lahaina near the resort.</p>
-            <div class="tags"><span class="tag t-pink">Shaved Ice ✓</span><span class="tag t-green">All Ages</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Ululani%27s+Shaved+Ice+Kihei+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Ululani%27s+Shaved+Ice+Kihei+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Ululani%27s+Shaved+Ice+Kihei&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>Best shaved ice in Hawaii — real fruit syrups, mochi, cream, azuki beans. Kihei location on the way back. Also a Lahaina location near the resort.</p>
+            <div class="tags"><span class="tag tp">Shaved Ice ✓</span><span class="tag tg">All Ages</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Ululani%27s+Shaved+Ice+Kihei+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Ululani%27s+Hawaiian+Shaved+Ice+Kihei+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Ululani%27s+Shaved+Ice+Kihei&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-pink">7</div>
-          <div class="stop-info">
-            <div class="stop-time">~6:30 PM · Birthday Dinner</div>
+        <div class="card">
+          <div class="badge bp">7</div>
+          <div class="ci">
+            <div class="tm">~6:30 PM · Birthday Dinner</div>
             <h3>Pizza on the Beach 🍕</h3>
-            <p><strong>Fabiani's Bakery &amp; Pizza</strong> (Wailea) or <strong>Paia Pizza</strong> (Kihei). Call ahead for 15 people and mention the birthday — many restaurants do a free dessert. Or return to the resort and order flatbreads at Sheraton's Cliff Dive Bar right on the beach.</p>
-            <div class="tags"><span class="tag t-pink">Pizza on Beach ✓</span><span class="tag t-green">Birthday Dinner</span><span class="tag t-orange">Reserve for 15</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Fabiani%27s+Bakery+Pizza+Wailea+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Fabiani%27s+Pizza+Wailea+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Fabiani%27s+Pizza+Wailea+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>Fabiani's Bakery &amp; Pizza (Wailea) or Paia Pizza (Kihei). Call ahead for 15 and mention it's a birthday. Or return to the resort and order flatbreads at Sheraton's Cliff Dive Bar right on the beach.</p>
+            <div class="tags"><span class="tag tp">Pizza on Beach ✓</span><span class="tag tg">Birthday Dinner</span><span class="tag to">Reserve for 15</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Fabiani%27s+Bakery+Pizza+Wailea+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Fabiani%27s+Pizza+Wailea+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Fabiani%27s+Pizza+Wailea+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
       </div><!-- /day3 -->
 
-      <!-- ══════════════ DAY 4 ══════════════ -->
+      <!-- ══ DAY 4 ══ -->
       <div id="day4" class="day-panel">
-        <div class="day-header">
-          <div class="date-label">Friday · June 13</div>
+        <div class="day-hdr">
+          <div class="dlabel">Friday · June 13</div>
           <h2>Zip Line + Lahaina</h2>
-          <div class="route-line"><span>Resort → Zipline → Black Rock Snorkel → Downtown Lahaina → Mama's Fish House → Shaved Ice</span></div>
+          <div class="route"><span>Resort → Zipline → Black Rock Snorkel → Downtown Lahaina → Mama's Fish House</span></div>
         </div>
+        <div class="alert"><strong>Zipline Note:</strong> Most require age 7–10 minimum. Youngest in group may not qualify — plan for them to enjoy the resort pool/beach with 1–2 adults while the rest zip.</div>
 
-        <div class="alert">
-          <strong>Zipline Note:</strong> Most ziplines require age 7–10 minimum. The youngest in your group likely won't qualify — plan for them to enjoy the resort pool/beach with 1–2 adults while the rest zip.
-        </div>
+        <div class="slabel">Morning</div>
 
-        <div class="section-title">Morning</div>
-
-        <div class="stop-card">
-          <div class="stop-badge b-blue">1</div>
-          <div class="stop-info">
-            <div class="stop-time">9:00 AM · Pre-book</div>
+        <div class="card">
+          <div class="badge bb">1</div>
+          <div class="ci">
+            <div class="tm">9:00 AM · Pre-book</div>
             <h3>Skyline Eco-Adventures — Ka'anapali Zipline</h3>
-            <p>Right at Ka'anapali on the mountain above the resort. 8 lines including a side-by-side race line. Ocean and mountain views are incredible. About 3 hours total. Book online in advance — confirm age/weight minimums for your group.</p>
-            <div class="tags"><span class="tag t-blue">Zip Line ✓</span><span class="tag t-orange">Book in Advance</span><span class="tag t-orange">Age 7+ Typically</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Skyline+Eco+Adventures+Kaanapali+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Skyline+Eco+Adventures+Kaanapali+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Skyline+Eco+Adventures+Kaanapali&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>Right at Ka'anapali on the mountain above the resort. 8 lines including a side-by-side race. Ocean and mountain views are incredible. About 3 hours. Confirm age/weight minimums before booking.</p>
+            <div class="tags"><span class="tag tb">Zip Line ✓</span><span class="tag to">Book in Advance</span><span class="tag to">Age 7+ Typically</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Skyline+Eco+Adventures+Kaanapali+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Skyline+Eco+Adventures+Kaanapali+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Skyline+Eco+Adventures+Kaanapali&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-pink">2</div>
-          <div class="stop-info">
-            <div class="stop-time">~1:00 PM</div>
+        <div class="card">
+          <div class="badge bp">2</div>
+          <div class="ci">
+            <div class="tm">~1:00 PM</div>
             <h3>Black Rock Snorkel — At the Sheraton</h3>
-            <p>Pu'u Keka'a steps from your room — turtles, tropical fish, an underwater wall to explore. Gear rental at the resort or nearby shops. Best in morning light but afternoon works too.</p>
-            <div class="tags"><span class="tag t-pink">Turtles</span><span class="tag t-blue">At Resort</span><span class="tag t-green">Free</span></div>
+            <p>Pu'u Keka'a steps from your room — turtles, tropical fish, an underwater wall to explore. Gear rental at resort or nearby shops. One of the best free snorkel spots on Maui.</p>
+            <div class="tags"><span class="tag tp">Turtles</span><span class="tag tb">At Resort</span><span class="tag tg">Free</span></div>
           </div>
         </div>
 
-        <div class="section-title">Afternoon</div>
+        <div class="slabel">Afternoon</div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-blue">3</div>
-          <div class="stop-info">
-            <div class="stop-time">~3:00 PM · 2 hrs</div>
+        <div class="card">
+          <div class="badge bb">3</div>
+          <div class="ci">
+            <div class="tm">~3:00 PM · 2 hrs</div>
             <h3>Downtown Lahaina</h3>
-            <p>Historic Front Street. Walk the massive Banyan Tree (largest in the US — planted 1873). Browse galleries and surf shops. Ice cream at <strong>Lappert's</strong>. <strong>Note: the August 2023 wildfire destroyed much of Lahaina</strong> — many shops are still rebuilding. Call ahead to confirm what's open.</p>
-            <div class="tags"><span class="tag t-blue">Historic Town</span><span class="tag t-blue">Banyan Tree</span><span class="tag t-orange">Fire Recovery — Call Ahead</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Downtown+Lahaina+Front+Street+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Downtown+Lahaina+Front+Street+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Front+Street+Lahaina+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>Historic Front Street. Walk the giant Banyan Tree (largest in the US — planted 1873). Browse galleries and shops. Ice cream at Lappert's. <strong>Note: 2023 wildfire destroyed much of Lahaina — call ahead to confirm what's open.</strong></p>
+            <div class="tags"><span class="tag tb">Historic Town</span><span class="tag tb">Banyan Tree</span><span class="tag to">Fire Recovery — Call Ahead</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Downtown+Lahaina+Front+Street+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Downtown+Lahaina+Front+Street+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Front+Street+Lahaina+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-pink">4</div>
-          <div class="stop-info">
-            <div class="stop-time">Afternoon</div>
+        <div class="card">
+          <div class="badge bp">4</div>
+          <div class="ci">
+            <div class="tm">Afternoon</div>
             <h3>Ululani's Hawaiian Shaved Ice — Lahaina</h3>
-            <p>Lahaina location near Front Street. Get the birthday girl a custom order with all the toppings — mochi, cream, azuki, you name it.</p>
-            <div class="tags"><span class="tag t-pink">Shaved Ice ✓</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Ululani%27s+Shaved+Ice+Lahaina+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Ululani%27s+Hawaiian+Shaved+Ice+Lahaina" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Ululani%27s+Shaved+Ice+Lahaina&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>Lahaina location near Front Street. Get the birthday girl a custom order — mochi, cream, azuki, all the toppings.</p>
+            <div class="tags"><span class="tag tp">Shaved Ice ✓</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Ululani%27s+Shaved+Ice+Lahaina+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Ululani%27s+Hawaiian+Shaved+Ice+Lahaina" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Ululani%27s+Shaved+Ice+Lahaina&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-pink">5</div>
-          <div class="stop-info">
-            <div class="stop-time">~5:30 PM · Book 2–4 months ahead</div>
+        <div class="card">
+          <div class="badge bp">5</div>
+          <div class="ci">
+            <div class="tm">~5:30 PM · Book 2–4 months ahead</div>
             <h3>Mama's Fish House — Pa'ia</h3>
-            <p>Most famous restaurant in Hawaii. Fresh-caught fish; the fisherman who caught your meal is named on the menu. Pa'ia is 45 min from the resort. <strong>For 15 people, call immediately — (808) 579-8488</strong>. Ask about the private dining room. Backup: Monkeypod Kitchen, 10 min from resort.</p>
-            <div class="tags"><span class="tag t-pink">Special Dinner</span><span class="tag t-orange">Book NOW — 2–4 Months Out</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Mama%27s+Fish+House+Paia+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Mama%27s+Fish+House+Paia+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Mama%27s+Fish+House+Paia+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>Most famous restaurant in Hawaii. Fresh-caught fish; the fisherman who caught your meal is named on the menu. Pa'ia is 45 min from resort. <strong>Call immediately for 15: (808) 579-8488.</strong> Ask about private dining room. Backup: Monkeypod Kitchen, Ka'anapali (10 min).</p>
+            <div class="tags"><span class="tag tp">Special Dinner</span><span class="tag to">Book NOW</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Mama%27s+Fish+House+Paia+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Mama%27s+Fish+House+Paia+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Mama%27s+Fish+House+Paia+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
       </div><!-- /day4 -->
 
-      <!-- ══════════════ DAY 5 ══════════════ -->
+      <!-- ══ DAY 5 ══ -->
       <div id="day5" class="day-panel">
-        <div class="day-header">
-          <div class="date-label">Saturday · June 14</div>
+        <div class="day-hdr">
+          <div class="dlabel">Saturday · June 14</div>
           <h2>Upcountry + Departure</h2>
-          <div class="route-line"><span>Resort → Farmers Market → Lavender Farm → Makawao → Airport (3 PM flight)</span></div>
+          <div class="route"><span>Resort → Farmers Market → Lavender Farm → Makawao → Airport (3 PM flight)</span></div>
         </div>
+        <div class="alert info"><strong>Flight departs 3:00 PM.</strong> Be at airport by <strong>1:00 PM</strong> (15 people + 3 rental cars). Leave Upcountry no later than <strong>11:45 AM</strong>.</div>
 
-        <div class="alert info">
-          <strong>Flight departs 3:00 PM.</strong> Be at the airport by <strong>1:00 PM</strong> (15 people + 3 rental cars = allow extra time). Leave Upcountry by <strong>11:45 AM</strong>. The morning window is 7 AM–11:45 AM — Farmers Market + Lavender Farm fit perfectly.
-        </div>
+        <div class="slabel">Morning (7:00 AM – 11:45 AM)</div>
 
-        <div class="section-title">Morning (7:00 AM – 11:45 AM)</div>
-
-        <div class="stop-card">
-          <div class="stop-badge b-green">1</div>
-          <div class="stop-info">
-            <div class="stop-time">7:00–10:00 AM · Saturdays Only</div>
+        <div class="card">
+          <div class="badge bg">1</div>
+          <div class="ci">
+            <div class="tm">7:00–10:00 AM · Saturdays Only</div>
             <h3>Upcountry Farmers Market — Kula</h3>
-            <p>One of the best farmers markets in Hawaii. Local produce, tropical fruits, fresh flowers, honey, jam, and hot food. Cool mountain air at 3,000 ft elevation. Saturday only, 7 AM–11 AM. About 45 min from the resort.</p>
-            <div class="tags"><span class="tag t-green">Farmer's Market ✓</span><span class="tag t-blue">Sat Only · 7–11 AM</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Upcountry+Farmers+Market+Kula+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Upcountry+Farmers+Market+Kula+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Upcountry+Farmers+Market+Kula+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>One of the best farmers markets in Hawaii. Local produce, tropical fruits, flowers, honey, and hot food. Cool mountain air at 3,000 ft. Saturday only, 7 AM–11 AM. About 45 min from resort.</p>
+            <div class="tags"><span class="tag tg">Farmer's Market ✓</span><span class="tag tb">Sat Only 7–11 AM</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Upcountry+Farmers+Market+Kula+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Upcountry+Farmers+Market+Kula+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Upcountry+Farmers+Market+Kula+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-purple">2</div>
-          <div class="stop-info">
-            <div class="stop-time">~10:00 AM · 45 min</div>
+        <div class="card">
+          <div class="badge bv">2</div>
+          <div class="ci">
+            <div class="tm">~10:00 AM · 45 min</div>
             <h3>Ali'i Kula Lavender Farm</h3>
-            <p>13.5-acre working lavender farm with ocean views down the mountain. Lavender lemonade, shortbread, soaps. The birthday girl will love it. Walking paths are paved and accessible. $3 suggested donation.</p>
-            <div class="tags"><span class="tag t-pink">Birthday Vibe ✓</span><span class="tag t-purple">Lavender Farm</span><span class="tag t-green">Ocean Views</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Alii+Kula+Lavender+Farm+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Alii+Kula+Lavender+Farm+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Alii+Kula+Lavender+Farm+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>13.5-acre working lavender farm with stunning ocean views. Lavender lemonade, shortbread, soaps. The birthday girl will love it. Paved accessible paths. $3 suggested donation.</p>
+            <div class="tags"><span class="tag tp">Birthday Vibe ✓</span><span class="tag tv">Lavender Farm</span><span class="tag tg">Ocean Views</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Alii+Kula+Lavender+Farm+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Alii+Kula+Lavender+Farm+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Alii+Kula+Lavender+Farm+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-blue">3</div>
-          <div class="stop-info">
-            <div class="stop-time">~11:00 AM · Quick Stop</div>
+        <div class="card">
+          <div class="badge bb">3</div>
+          <div class="ci">
+            <div class="tm">~11:00 AM · Quick Stop</div>
             <h3>Makawao Town</h3>
-            <p>Old-west paniolo (cowboy) town. <strong>Komoda Store &amp; Bakery</strong> — legendary cream puffs and donuts since 1916; get there early, they sell out. Good souvenir shops on the main strip. Quick stop before heading to the airport.</p>
-            <div class="tags"><span class="tag t-blue">Upcountry Town</span><span class="tag t-green">Komoda Bakery ✓</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Makawao+Town+Maui" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Makawao+Town+Maui" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Makawao+Town+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>Old-west paniolo (cowboy) town. <strong>Komoda Store &amp; Bakery</strong> — legendary cream puffs since 1916; get there early, they sell out. Good souvenir shops on the strip.</p>
+            <div class="tags"><span class="tag tb">Upcountry Town</span><span class="tag tg">Komoda Bakery ✓</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Makawao+Town+Maui" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Makawao+Town+Maui" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Makawao+Town+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="stop-card">
-          <div class="stop-badge b-orange">4</div>
-          <div class="stop-info">
-            <div class="stop-time">Leave by 11:45 AM · Arrive Airport 1:00 PM · Fly 3:00 PM</div>
+        <div class="card">
+          <div class="badge bo">4</div>
+          <div class="ci">
+            <div class="tm">Leave 11:45 AM · Airport 1:00 PM · Fly 3:00 PM</div>
             <h3>Head to Airport — Kahului (OGG)</h3>
-            <p>Return 3 rental cars and check in. With 15 people the rental return alone takes 20–30 min — budget accordingly. Traffic on Hwy 30 can back up on Saturdays. Leave Upcountry no later than 11:45 AM.</p>
-            <div class="tags"><span class="tag t-orange">Depart 3:00 PM</span><span class="tag t-orange">At Airport by 1:00 PM</span><span class="tag t-orange">Leave Upcountry 11:45 AM</span></div>
-            <div class="nav-btns">
-              <a class="nav-btn nav-apple" href="https://maps.apple.com/?q=Kahului+Airport+Maui+OGG" target="_blank">🍎 Apple Maps</a>
-              <a class="nav-btn nav-google" href="https://www.google.com/maps/search/?api=1&query=Kahului+Airport+Maui+OGG" target="_blank">📍 Google Maps</a>
-              <a class="nav-btn nav-waze" href="https://waze.com/ul?q=Kahului+Airport+Maui&navigate=yes" target="_blank">🚗 Waze</a>
+            <p>Return 3 rental cars and check in. With 15 people the rental return takes 20–30 min. Traffic can back up on Saturdays. Leave Upcountry by 11:45 AM — no exceptions.</p>
+            <div class="tags"><span class="tag to">Depart 3:00 PM</span><span class="tag to">At Airport 1:00 PM</span><span class="tag to">Leave 11:45 AM</span></div>
+            <div class="navs">
+              <a class="nb na" href="https://maps.apple.com/?q=Kahului+Airport+Maui+OGG" target="_blank">🍎 Apple Maps</a>
+              <a class="nb ng" href="https://www.google.com/maps/search/?api=1&query=Kahului+Airport+Maui+OGG" target="_blank">📍 Google Maps</a>
+              <a class="nb nw" href="https://waze.com/ul?q=Kahului+Airport+Maui&navigate=yes" target="_blank">🚗 Waze</a>
             </div>
           </div>
         </div>
 
-        <div class="section-title">Bonus — Add If Time Allows</div>
-        <div class="suggestions-box">
+        <div class="slabel">Bonus — If Time Allows</div>
+        <div class="sugg">
           <h3>More Upcountry Options</h3>
-          <div class="suggest-item">
-            <h4>Surfing Goat Dairy</h4>
-            <p>Fun goat farm in Kula — tours, cheese tasting, feed baby goats. The youngest kids will love it. Reserve online.</p>
-            <span class="swap-label">Swap for Lavender Farm</span>
-          </div>
-          <div class="suggest-item">
-            <h4>Haleakalā Sunrise (Day 4 add-on)</h4>
-            <p>Leave resort at 3 AM, summit 10,023 ft for sunrise above the clouds. Reservation required (recreation.gov). Challenging with young kids in the cold — only if the group is up for it.</p>
-            <span class="swap-label">Epic but demanding</span>
-          </div>
-          <div class="suggest-item">
-            <h4>Ho'okipa Beach Park</h4>
-            <p>Sea turtles resting on the beach AND world-class windsurfers. Easy stop on the drive to/from Road to Hana on Day 2.</p>
-            <span class="swap-label">Add to Day 2 route</span>
-          </div>
+          <div class="si"><h4>Surfing Goat Dairy</h4><p>Fun goat farm in Kula — tours, cheese tasting, feed baby goats. The youngest kids will love it.</p><span class="swap">Swap for Lavender Farm</span></div>
+          <div class="si"><h4>Ho'okipa Beach Park</h4><p>Sea turtles resting on the beach AND world-class windsurfers. Easy stop on Day 2 drive to/from Hana.</p><span class="swap">Add to Day 2 route</span></div>
+          <div class="si"><h4>Haleakalā Sunrise</h4><p>Leave resort at 3 AM, summit 10,023 ft for sunrise above the clouds. Reservation required. Very challenging with young kids in cold weather.</p><span class="swap">Epic but demanding</span></div>
         </div>
       </div><!-- /day5 -->
 
-      <!-- ══════════════ AREA MAPS ══════════════ -->
+      <!-- ══ AREA MAPS ══ -->
       <div id="areas" class="day-panel">
-        <div class="day-header">
-          <div class="date-label">Reference</div>
+        <div class="day-hdr">
+          <div class="dlabel">Reference</div>
           <h2>Maui Area Maps</h2>
-          <div class="route-line">Interactive maps load with internet. Each shows streets, landmarks, and trip pins.</div>
+          <div class="route">Tap each map to zoom and explore. Loads with internet — pins and streets shown.</div>
         </div>
-
         <div class="area-grid">
-          <div class="area-card">
-            <div class="area-card-title">🏨 NW Maui — Ka'anapali &amp; Lahaina</div>
-            <div id="map-nw" class="area-map"></div>
-          </div>
-          <div class="area-card">
-            <div class="area-card-title">🐢 SW Maui — Kihei, Wailea &amp; Makena</div>
-            <div id="map-sw" class="area-map"></div>
-          </div>
-          <div class="area-card">
-            <div class="area-card-title">🌿 Road to Hana — North Shore</div>
-            <div id="map-hana" class="area-map"></div>
-          </div>
-          <div class="area-card">
-            <div class="area-card-title">✈️ Central Maui — Airport &amp; Iao Valley</div>
-            <div id="map-central" class="area-map"></div>
-          </div>
-          <div class="area-card">
-            <div class="area-card-title">🌺 Upcountry — Kula &amp; Makawao</div>
-            <div id="map-upcountry" class="area-map"></div>
-          </div>
+          <div class="acard"><div class="acard-title">🏨 NW Maui — Ka'anapali &amp; Lahaina</div><div id="map-nw" class="amap"></div></div>
+          <div class="acard"><div class="acard-title">🐢 SW Maui — Kihei &amp; Makena</div><div id="map-sw" class="amap"></div></div>
+          <div class="acard"><div class="acard-title">🌿 Road to Hana — North Shore</div><div id="map-hana" class="amap"></div></div>
+          <div class="acard"><div class="acard-title">✈️ Central — Airport &amp; Iao Valley</div><div id="map-central" class="amap"></div></div>
+          <div class="acard"><div class="acard-title">🌺 Upcountry — Kula &amp; Makawao</div><div id="map-upcountry" class="amap"></div></div>
         </div>
       </div><!-- /areas -->
 
-      <!-- ══════════════ BOOK NOW ══════════════ -->
+      <!-- ══ BOOK NOW ══ -->
       <div id="notes" class="day-panel">
-        <div class="day-header">
-          <div class="date-label">Action Required</div>
+        <div class="day-hdr">
+          <div class="dlabel">Action Required</div>
           <h2>Book These Now</h2>
-          <div class="route-line">Large groups of 15 are harder to seat last minute. Call rather than booking online.</div>
+          <div class="route">15 people = harder to seat last minute. Call rather than booking online.</div>
         </div>
+        <div class="nhdr">Start with the red items — those book out months in advance.</div>
 
-        <div class="booking-card">
-          <h3>Rental Cars — 3 Vehicles</h3>
-          <span class="urgency u-red">Book Immediately</span>
-          <p>Maui rentals sell out fast in June. Book 3 SUVs now — compare Enterprise, Budget, Dollar at OGG airport.</p>
-        </div>
-        <div class="booking-card">
-          <h3>Wai'anapanapa Black Sand Beach</h3>
-          <span class="urgency u-red">Sells Out Fast</span>
-          <p>Timed entry: <strong>$15/vehicle</strong><br>Book at: <a href="https://gostateparks.hawaii.gov" target="_blank">gostateparks.hawaii.gov</a><br>Needed: Day 2 (Road to Hana)</p>
-        </div>
-        <div class="booking-card">
-          <h3>Seven Sacred Pools — Haleakalā NP</h3>
-          <span class="urgency u-red">Required Entry</span>
-          <p>Timed NPS entry: <strong>$35/vehicle</strong><br>Book at: <a href="https://recreation.gov" target="_blank">recreation.gov</a><br>Needed: Day 2 (end of Hana road)</p>
-        </div>
-        <div class="booking-card">
-          <h3>Old Lahaina Luau</h3>
-          <span class="urgency u-red">Months in Advance</span>
-          <p>Best luau on Maui — sells out constantly.<br>Book at: <a href="https://oldlahainaluau.com" target="_blank">oldlahainaluau.com</a><br>Backup: Drums of the Pacific at Ka'anapali Hyatt.</p>
-        </div>
-        <div class="booking-card">
-          <h3>Mama's Fish House</h3>
-          <span class="urgency u-red">2–4 Months Out</span>
-          <p>Call for party of 15 — ask for private room.<br>Phone: <strong>(808) 579-8488</strong><br>Backup: Monkeypod Kitchen, Ka'anapali (10 min from resort).</p>
-        </div>
-        <div class="booking-card">
-          <h3>Molokini Snorkel Cruise</h3>
-          <span class="urgency u-orange">2–3 Weeks Ahead</span>
-          <p>Pride of Maui, Maui Magic, or Kai Kanani. Call direct for group rate on 15 people.<br>Needed: Day 3 Morning</p>
-        </div>
-        <div class="booking-card">
-          <h3>Skyline Zipline — Ka'anapali</h3>
-          <span class="urgency u-orange">1–2 Weeks Ahead</span>
-          <p>Confirm age/weight minimums before booking — youngest in group may not qualify.<br>Needed: Day 4 Morning</p>
-        </div>
-        <div class="booking-card">
-          <h3>Horseback Riding (Birthday Girl)</h3>
-          <span class="urgency u-yellow">Optional — Book If Desired</span>
-          <p><strong>Mendes Ranch</strong> (Ka'anapali) or <strong>Piiholo Ranch</strong> (Upcountry). Call for 13-year-old specific options. Minimum ages vary.</p>
-        </div>
+        <div class="bcard"><h3>Rental Cars — 3 Vehicles</h3><span class="urg ur">Book Immediately</span><p>Maui rentals sell out fast in June. Book 3 SUVs at OGG — compare Enterprise, Budget, Dollar.</p></div>
+        <div class="bcard"><h3>Old Lahaina Luau</h3><span class="urg ur">Months in Advance</span><p>Book at <a href="https://oldlahainaluau.com" target="_blank">oldlahainaluau.com</a>. Backup: Drums of the Pacific at Ka'anapali Hyatt.</p></div>
+        <div class="bcard"><h3>Mama's Fish House</h3><span class="urg ur">2–4 Months Out</span><p>Call for group of 15, ask for private room.<br><strong>(808) 579-8488</strong><br>Backup: Monkeypod Kitchen, Ka'anapali.</p></div>
+        <div class="bcard"><h3>Wai'anapanapa Black Sand Beach</h3><span class="urg ur">Sells Out Fast</span><p>$15/car — <a href="https://gostateparks.hawaii.gov" target="_blank">gostateparks.hawaii.gov</a><br>Needed: Day 2</p></div>
+        <div class="bcard"><h3>Seven Sacred Pools — Haleakalā NP</h3><span class="urg ur">Required Entry</span><p>$35/car — <a href="https://recreation.gov" target="_blank">recreation.gov</a><br>Needed: Day 2</p></div>
+        <div class="bcard"><h3>Molokini Snorkel Cruise</h3><span class="urg uo">2–3 Weeks Ahead</span><p>Pride of Maui or Maui Magic. Call direct for group rate.<br>Needed: Day 3 Morning</p></div>
+        <div class="bcard"><h3>Skyline Zipline Ka'anapali</h3><span class="urg uo">1–2 Weeks Ahead</span><p>Confirm age/weight minimums — youngest may not qualify.<br>Needed: Day 4 Morning</p></div>
+        <div class="bcard"><h3>Horseback Riding (Birthday Girl)</h3><span class="urg uy">Optional</span><p>Mendes Ranch (Ka'anapali) or Piiholo Ranch (Upcountry). Call for 13-year-old options.</p></div>
 
-        <div class="section-title">Good to Know</div>
-        <div class="suggestions-box">
-          <div class="suggest-item">
-            <h4>No Gas in Hana</h4>
-            <p>Fill all 3 vehicles in Kahului before getting on Hwy 36. The next gas after Pa'ia is back in Kahului, 2+ hours away.</p>
-          </div>
-          <div class="suggest-item">
-            <h4>No Cell Signal on Hana Road</h4>
-            <p>Signal drops to near zero after Garden of Eden. Screenshot this guide and download offline Google Maps for Pa'ia → Hana before leaving.</p>
-          </div>
-          <div class="suggest-item">
-            <h4>Lahaina Fire Recovery</h4>
-            <p>The 2023 wildfire destroyed much of historic Front Street. Many shops are reopening — call ahead before visiting specific businesses.</p>
-          </div>
-          <div class="suggest-item">
-            <h4>Reef-Safe Sunscreen</h4>
-            <p>Required at all Hawaii state parks. Bring or buy oxybenzone-free sunscreen before arriving.</p>
-          </div>
-          <div class="suggest-item">
-            <h4>Turtles — 10-Foot Rule</h4>
-            <p>Hawaiian green sea turtles are federally protected. You must stay 10 feet away. Don't touch, chase, or block their path. Fines apply.</p>
-          </div>
+        <div class="slabel">Good to Know</div>
+        <div class="sugg">
+          <div class="si"><h4>No Gas in Hana</h4><p>Fill all 3 vehicles in Kahului before Hwy 36. Next gas after Pa'ia is 2+ hours away.</p></div>
+          <div class="si"><h4>No Cell Signal on Hana Road</h4><p>Signal drops after Garden of Eden. Download Google Maps offline for Pa'ia→Hana before leaving the hotel.</p></div>
+          <div class="si"><h4>Lahaina Fire Recovery</h4><p>August 2023 wildfire destroyed much of Front Street. Many shops reopening — call ahead before visiting.</p></div>
+          <div class="si"><h4>Reef-Safe Sunscreen</h4><p>Required at all Hawaii state parks. Bring or buy oxybenzone-free sunscreen.</p></div>
+          <div class="si"><h4>10-Foot Rule for Turtles</h4><p>Hawaiian green sea turtles are federally protected. Stay 10 feet away — fines apply.</p></div>
         </div>
       </div><!-- /notes -->
 
-    </div><!-- /panels -->
-  </div><!-- /panel-wrap -->
-</div><!-- /main-layout -->
+    </div><!-- /panel-wrap -->
+  </div><!-- /content-grid -->
+</div><!-- /app -->
 
-<button class="print-fab" onclick="window.print()" title="Print or Save as PDF">🖨️</button>
+<button class="pfab" onclick="window.print()" title="Print / Save PDF">🖨️</button>
 
-<!-- ── MAP INIT — Enhanced when JS available ── -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/maui-trip/sw.js').catch(function(){});
+}
 (function(){
   try {
     if (typeof L === 'undefined') return;
+    var mainMap = L.map('map',{zoomControl:true,attributionControl:false});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(mainMap);
+    L.control.attribution({prefix:'© <a href="https://openstreetmap.org">OSM</a>'}).addTo(mainMap);
+    var mapDiv = document.getElementById('map');
+    if (mapDiv.querySelector('.map-msg')) mapDiv.innerHTML = '';
 
-    var mainMap = L.map('map', { zoomControl:true, attributionControl:false });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ maxZoom:18 }).addTo(mainMap);
-    L.control.attribution({ prefix:'© <a href="https://openstreetmap.org">OSM</a>' }).addTo(mainMap);
-
-    // Clear the placeholder text once map loads
-    document.getElementById('map').innerHTML = '';
-
-    var markers = [];
-
-    var DAYS = {
-      day1:{ center:[20.89,-156.57], zoom:11, pins:[
-        { ll:[20.8986,-156.4306], n:'1 Airport (OGG)', c:'#0077b6' },
-        { ll:[20.8797,-156.5486], n:'2 Iao Valley', c:'#0077b6' },
-        { ll:[20.8140,-156.6473], n:"3 Leoda's Kitchen", c:'#38a169' },
-        { ll:[20.8794,-156.6769], n:'4 Safeway Lahaina', c:'#0077b6' },
-        { ll:[20.9260,-156.6927], n:'5 Sheraton Maui', c:'#0077b6' },
-        { ll:[20.9268,-156.6921], n:'6 Black Rock Cliff Dive', c:'#d53f8c' },
-        { ll:[20.8763,-156.6793], n:'7 Old Lahaina Luau', c:'#805ad5' },
-      ]},
-      day2:{ center:[20.84,-156.10], zoom:10, pins:[
-        { ll:[20.9161,-156.3762], n:'1 Paia Town', c:'#38a169' },
-        { ll:[20.9046,-156.2499], n:'2 Twin Falls', c:'#0077b6' },
-        { ll:[20.8831,-156.2037], n:'3 Garden of Eden', c:'#d53f8c' },
-        { ll:[20.8393,-156.0744], n:"4 Aunty Sandy's Banana Bread", c:'#38a169' },
-        { ll:[20.7734,-155.9900], n:'5 Black Sand Beach', c:'#d53f8c' },
-        { ll:[20.7621,-155.9893], n:'6 Hana Town', c:'#38a169' },
-        { ll:[20.6659,-156.0425], n:'7 Seven Sacred Pools', c:'#0077b6' },
-      ]},
-      day3:{ center:[20.73,-156.44], zoom:11, pins:[
-        { ll:[20.7927,-156.5063], n:'1 Maalaea Harbor', c:'#0077b6' },
-        { ll:[20.7600,-156.4484], n:'2 Kihei Lunch', c:'#38a169' },
-        { ll:[20.6386,-156.4418], n:'3 Turtle Town', c:'#d53f8c' },
-        { ll:[20.6278,-156.4364], n:'4 Makena Big Beach', c:'#0077b6' },
-        { ll:[20.7478,-156.4441], n:"5 Ululani's Shaved Ice", c:'#d53f8c' },
-      ]},
-      day4:{ center:[20.90,-156.60], zoom:12, pins:[
-        { ll:[20.9341,-156.6944], n:'1 Skyline Zipline', c:'#0077b6' },
-        { ll:[20.9268,-156.6921], n:'2 Black Rock Snorkel', c:'#d53f8c' },
-        { ll:[20.8763,-156.6793], n:'3 Downtown Lahaina', c:'#0077b6' },
-        { ll:[20.8820,-156.6740], n:"4 Ululani's Shaved Ice", c:'#d53f8c' },
-        { ll:[20.9291,-156.3558], n:"5 Mama's Fish House", c:'#d53f8c' },
-      ]},
-      day5:{ center:[20.78,-156.33], zoom:11, pins:[
-        { ll:[20.7714,-156.3394], n:'1 Upcountry Farmers Market', c:'#38a169' },
-        { ll:[20.7607,-156.3298], n:"2 Ali'i Kula Lavender Farm", c:'#805ad5' },
-        { ll:[20.8573,-156.3100], n:'3 Makawao Town', c:'#0077b6' },
-        { ll:[20.8986,-156.4306], n:'4 Airport OGG', c:'#dd6b20' },
-      ]},
-      areas:{ center:[20.80,-156.33], zoom:10, pins:[
-        { ll:[20.9260,-156.6927], n:'Sheraton Maui', c:'#d53f8c' },
-        { ll:[20.8986,-156.4306], n:'Airport OGG', c:'#0077b6' },
-        { ll:[20.7927,-156.5063], n:'Maalaea Harbor', c:'#0077b6' },
-        { ll:[20.6386,-156.4418], n:'Turtle Town', c:'#38a169' },
-        { ll:[20.7621,-155.9893], n:'Hana', c:'#0077b6' },
-        { ll:[20.7714,-156.3394], n:'Upcountry', c:'#805ad5' },
-      ]},
-      notes:{ center:[20.80,-156.33], zoom:10, pins:[] }
+    var mks=[], lns=[];
+    var DAYS={
+      day1:{c:[20.89,-156.57],z:11,p:[
+        {ll:[20.8986,-156.4306],n:'1 Airport OGG',col:'#0077b6'},
+        {ll:[20.8797,-156.5486],n:'2 Iao Valley',col:'#0077b6'},
+        {ll:[20.8140,-156.6473],n:"3 Leoda's Kitchen",col:'#38a169'},
+        {ll:[20.8794,-156.6769],n:'4 Safeway Lahaina',col:'#0077b6'},
+        {ll:[20.9260,-156.6927],n:'5 Sheraton Maui',col:'#0077b6'},
+        {ll:[20.9268,-156.6921],n:'6 Black Rock Cliff Dive',col:'#d53f8c'},
+        {ll:[20.8763,-156.6793],n:'7 Old Lahaina Luau',col:'#805ad5'}]},
+      day2:{c:[20.84,-156.10],z:10,p:[
+        {ll:[20.9161,-156.3762],n:'1 Paia Town',col:'#38a169'},
+        {ll:[20.9046,-156.2499],n:'2 Twin Falls',col:'#0077b6'},
+        {ll:[20.8831,-156.2037],n:'3 Garden of Eden',col:'#d53f8c'},
+        {ll:[20.8393,-156.0744],n:"4 Aunty Sandy's",col:'#38a169'},
+        {ll:[20.7734,-155.9900],n:'5 Black Sand Beach',col:'#d53f8c'},
+        {ll:[20.7621,-155.9893],n:'6 Hana Town',col:'#38a169'},
+        {ll:[20.6659,-156.0425],n:'7 Seven Sacred Pools',col:'#0077b6'}]},
+      day3:{c:[20.73,-156.44],z:11,p:[
+        {ll:[20.7927,-156.5063],n:'1 Maalaea Harbor',col:'#0077b6'},
+        {ll:[20.7600,-156.4484],n:'2 Kihei Lunch',col:'#38a169'},
+        {ll:[20.6386,-156.4418],n:'3 Turtle Town',col:'#d53f8c'},
+        {ll:[20.6278,-156.4364],n:'4 Makena Big Beach',col:'#0077b6'},
+        {ll:[20.7478,-156.4441],n:"5 Ululani's Shaved Ice",col:'#d53f8c'}]},
+      day4:{c:[20.90,-156.60],z:12,p:[
+        {ll:[20.9341,-156.6944],n:'1 Skyline Zipline',col:'#0077b6'},
+        {ll:[20.9268,-156.6921],n:'2 Black Rock Snorkel',col:'#d53f8c'},
+        {ll:[20.8763,-156.6793],n:'3 Downtown Lahaina',col:'#0077b6'},
+        {ll:[20.8820,-156.6740],n:"4 Ululani's Shaved Ice",col:'#d53f8c'},
+        {ll:[20.9291,-156.3558],n:"5 Mama's Fish House",col:'#d53f8c'}]},
+      day5:{c:[20.78,-156.33],z:11,p:[
+        {ll:[20.7714,-156.3394],n:'1 Farmers Market',col:'#38a169'},
+        {ll:[20.7607,-156.3298],n:'2 Lavender Farm',col:'#805ad5'},
+        {ll:[20.8573,-156.3100],n:'3 Makawao Town',col:'#0077b6'},
+        {ll:[20.8986,-156.4306],n:'4 Airport OGG',col:'#dd6b20'}]},
+      areas:{c:[20.80,-156.33],z:10,p:[
+        {ll:[20.9260,-156.6927],n:'Sheraton Maui',col:'#d53f8c'},
+        {ll:[20.8986,-156.4306],n:'Airport OGG',col:'#0077b6'},
+        {ll:[20.7927,-156.5063],n:'Maalaea Harbor',col:'#0077b6'},
+        {ll:[20.6386,-156.4418],n:'Turtle Town',col:'#38a169'},
+        {ll:[20.7621,-155.9893],n:'Hana',col:'#0077b6'},
+        {ll:[20.7714,-156.3394],n:'Upcountry',col:'#805ad5'}]},
+      notes:{c:[20.80,-156.33],z:10,p:[]}
     };
 
-    function icon(c,n){
-      return L.divIcon({ className:'', iconAnchor:[15,15],
-        html:'<div style="width:28px;height:28px;background:'+c+';border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:800;">'+n+'</div>'
-      });
+    function ico(col,n){
+      return L.divIcon({className:'',iconAnchor:[14,14],
+        html:'<div style="width:27px;height:27px;background:'+col+';border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800;">'+n+'</div>'});
     }
 
-    var polylines = [];
-
-    function renderMain(key) {
-      markers.forEach(function(m){ mainMap.removeLayer(m); });
-      polylines.forEach(function(p){ mainMap.removeLayer(p); });
-      markers = []; polylines = [];
-      var d = DAYS[key]; if (!d) return;
-      mainMap.setView(d.center, d.zoom);
-      d.pins.forEach(function(p,i){
-        var m = L.marker(p.ll, { icon: icon(p.c, i+1) }).addTo(mainMap)
+    function renderMain(key){
+      mks.forEach(function(m){mainMap.removeLayer(m);});
+      lns.forEach(function(l){mainMap.removeLayer(l);});
+      mks=[];lns=[];
+      var d=DAYS[key];if(!d)return;
+      mainMap.setView(d.c,d.z);
+      d.p.forEach(function(p,i){
+        var m=L.marker(p.ll,{icon:ico(p.col,i+1)}).addTo(mainMap)
           .bindPopup('<strong style="font-size:13px">'+p.n+'</strong>');
-        markers.push(m);
+        mks.push(m);
       });
-      if (d.pins.length > 1) {
-        var pl = L.polyline(d.pins.map(function(p){ return p.ll; }),
-          { color:'#0077b6', weight:2.5, opacity:0.4, dashArray:'6,6' }).addTo(mainMap);
-        polylines.push(pl);
+      if(d.p.length>1){
+        lns.push(L.polyline(d.p.map(function(p){return p.ll;}),
+          {color:'#0077b6',weight:2.5,opacity:.4,dashArray:'6,6'}).addTo(mainMap));
       }
     }
 
     renderMain('day1');
+    setTimeout(function(){mainMap.invalidateSize();},300);
 
-    // Wire tab labels to update map
-    var tabIds = ['r1','r2','r3','r4','r5','r6','r7'];
-    var dayKeys = ['day1','day2','day3','day4','day5','areas','notes'];
-    tabIds.forEach(function(id, i) {
-      var el = document.getElementById(id);
-      if (el) el.addEventListener('change', function(){
-        renderMain(dayKeys[i]);
-        setTimeout(function(){ mainMap.invalidateSize(); }, 100);
-        if (dayKeys[i] === 'areas' && !areaDone) { areaDone=true; setTimeout(initArea, 300); }
-      });
-    });
+    var keys=['day1','day2','day3','day4','day5','areas','notes'];
+    var areaDone=false;
+    for(var i=1;i<=7;i++){
+      (function(idx){
+        var el=document.getElementById('r'+idx);
+        if(el) el.addEventListener('change',function(){
+          renderMain(keys[idx-1]);
+          setTimeout(function(){mainMap.invalidateSize();},100);
+          if(keys[idx-1]==='areas'&&!areaDone){areaDone=true;setTimeout(initArea,300);}
+        });
+      })(i);
+    }
 
-    // Area maps
-    var areaDone = false;
-    function areaMap(id, center, zoom, pins) {
-      var m = L.map(id, { zoomControl:true, attributionControl:false });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ maxZoom:18 }).addTo(m);
-      m.setView(center, zoom);
+    function aMap(id,center,zoom,pins){
+      if(!document.getElementById(id))return;
+      var m=L.map(id,{zoomControl:true,attributionControl:false});
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(m);
+      m.setView(center,zoom);
       pins.forEach(function(p,i){
-        L.marker(p.ll, { icon:icon(p.c, i+1) }).addTo(m)
+        L.marker(p.ll,{icon:ico(p.col,i+1)}).addTo(m)
           .bindPopup('<strong style="font-size:13px">'+p.n+'</strong>');
       });
-      setTimeout(function(){ m.invalidateSize(); }, 400);
+      setTimeout(function(){m.invalidateSize();},400);
     }
 
-    function initArea() {
-      areaMap('map-nw',[20.90,-156.67],13,[
-        {ll:[20.9260,-156.6927],n:'Sheraton Maui',c:'#d53f8c'},
-        {ll:[20.9268,-156.6921],n:'Black Rock',c:'#d53f8c'},
-        {ll:[20.9341,-156.6944],n:'Skyline Zipline',c:'#0077b6'},
-        {ll:[20.8763,-156.6793],n:'Downtown Lahaina',c:'#0077b6'},
-        {ll:[20.8820,-156.6740],n:"Ululani's Shaved Ice",c:'#38a169'},
-        {ll:[20.8794,-156.6769],n:'Safeway Lahaina',c:'#38a169'},
-        {ll:[20.8140,-156.6473],n:"Leoda's Kitchen (Olowalu)",c:'#38a169'},
-      ]);
-      areaMap('map-sw',[20.72,-156.44],12,[
-        {ll:[20.7927,-156.5063],n:'Maalaea Harbor + Ocean Center',c:'#0077b6'},
-        {ll:[20.7600,-156.4484],n:'Kihei Town',c:'#0077b6'},
-        {ll:[20.7478,-156.4441],n:"Ululani's Shaved Ice Kihei",c:'#38a169'},
-        {ll:[20.6386,-156.4418],n:'Turtle Town / Maluaka Beach',c:'#d53f8c'},
-        {ll:[20.6278,-156.4364],n:'Makena Big Beach',c:'#d53f8c'},
-      ]);
-      areaMap('map-hana',[20.83,-156.15],10,[
-        {ll:[20.9161,-156.3762],n:'Paia Town',c:'#38a169'},
-        {ll:[20.9358,-156.3562],n:"Ho'okipa Beach",c:'#d53f8c'},
-        {ll:[20.9291,-156.3558],n:"Mama's Fish House",c:'#d53f8c'},
-        {ll:[20.9046,-156.2499],n:'Twin Falls',c:'#0077b6'},
-        {ll:[20.8831,-156.2037],n:'Garden of Eden',c:'#d53f8c'},
-        {ll:[20.8393,-156.0744],n:"Aunty Sandy's Banana Bread",c:'#38a169'},
-        {ll:[20.7734,-155.9900],n:'Black Sand Beach',c:'#0077b6'},
-        {ll:[20.7621,-155.9893],n:'Hana Town',c:'#0077b6'},
-        {ll:[20.6659,-156.0425],n:'Seven Sacred Pools',c:'#0077b6'},
-      ]);
-      areaMap('map-central',[20.89,-156.49],12,[
-        {ll:[20.8986,-156.4306],n:'Kahului Airport OGG',c:'#dd6b20'},
-        {ll:[20.8797,-156.5486],n:'Iao Valley',c:'#0077b6'},
-        {ll:[20.8896,-156.4696],n:'Kahului (Gas + Safeway)',c:'#38a169'},
-      ]);
-      areaMap('map-upcountry',[20.78,-156.33],12,[
-        {ll:[20.7714,-156.3394],n:'Upcountry Farmers Market',c:'#38a169'},
-        {ll:[20.7607,-156.3298],n:"Ali'i Kula Lavender Farm",c:'#805ad5'},
-        {ll:[20.7468,-156.3225],n:'Surfing Goat Dairy',c:'#38a169'},
-        {ll:[20.8573,-156.3100],n:'Makawao Town',c:'#0077b6'},
-      ]);
+    function initArea(){
+      aMap('map-nw',[20.90,-156.67],13,[
+        {ll:[20.9260,-156.6927],n:'Sheraton Maui',col:'#d53f8c'},
+        {ll:[20.9341,-156.6944],n:'Skyline Zipline',col:'#0077b6'},
+        {ll:[20.8763,-156.6793],n:'Downtown Lahaina',col:'#0077b6'},
+        {ll:[20.8820,-156.6740],n:"Ululani's Shaved Ice",col:'#38a169'},
+        {ll:[20.8794,-156.6769],n:'Safeway Lahaina',col:'#38a169'},
+        {ll:[20.8140,-156.6473],n:"Leoda's Kitchen",col:'#38a169'}]);
+      aMap('map-sw',[20.72,-156.44],12,[
+        {ll:[20.7927,-156.5063],n:'Maalaea Harbor + Ocean Center',col:'#0077b6'},
+        {ll:[20.7600,-156.4484],n:'Kihei Town',col:'#0077b6'},
+        {ll:[20.7478,-156.4441],n:"Ululani's Shaved Ice",col:'#38a169'},
+        {ll:[20.6386,-156.4418],n:'Turtle Town',col:'#d53f8c'},
+        {ll:[20.6278,-156.4364],n:'Makena Big Beach',col:'#d53f8c'}]);
+      aMap('map-hana',[20.83,-156.15],10,[
+        {ll:[20.9161,-156.3762],n:'Paia Town',col:'#38a169'},
+        {ll:[20.9358,-156.3562],n:"Ho'okipa Beach",col:'#d53f8c'},
+        {ll:[20.9291,-156.3558],n:"Mama's Fish House",col:'#d53f8c'},
+        {ll:[20.9046,-156.2499],n:'Twin Falls',col:'#0077b6'},
+        {ll:[20.8831,-156.2037],n:'Garden of Eden',col:'#d53f8c'},
+        {ll:[20.8393,-156.0744],n:"Aunty Sandy's Banana Bread",col:'#38a169'},
+        {ll:[20.7734,-155.9900],n:'Black Sand Beach',col:'#0077b6'},
+        {ll:[20.7621,-155.9893],n:'Hana Town',col:'#0077b6'},
+        {ll:[20.6659,-156.0425],n:'Seven Sacred Pools',col:'#0077b6'}]);
+      aMap('map-central',[20.89,-156.49],12,[
+        {ll:[20.8986,-156.4306],n:'Kahului Airport OGG',col:'#dd6b20'},
+        {ll:[20.8797,-156.5486],n:'Iao Valley',col:'#0077b6'},
+        {ll:[20.8896,-156.4696],n:'Kahului (Gas + Stores)',col:'#38a169'}]);
+      aMap('map-upcountry',[20.78,-156.33],12,[
+        {ll:[20.7714,-156.3394],n:'Upcountry Farmers Market',col:'#38a169'},
+        {ll:[20.7607,-156.3298],n:"Ali'i Kula Lavender Farm",col:'#805ad5'},
+        {ll:[20.7468,-156.3225],n:'Surfing Goat Dairy',col:'#38a169'},
+        {ll:[20.8573,-156.3100],n:'Makawao Town',col:'#0077b6'}]);
     }
-
-  } catch(e) {
-    // Map unavailable — tabs still work via CSS
-    console.log('Map unavailable:', e);
-  }
+  } catch(e){ console.log('Map unavailable:',e); }
 })();
 </script>
 </body>
