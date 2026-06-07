@@ -115,9 +115,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 /* PRINT FAB */
 .pfab{position:fixed;bottom:20px;right:16px;background:#0077b6;color:#fff;border:none;width:52px;height:52px;border-radius:50%;font-size:19px;cursor:pointer;box-shadow:0 4px 14px rgba(0,119,182,.45);z-index:9999;display:flex;align-items:center;justify-content:center;}
 
-/* PRINT */
+/* PRINT — full itinerary */
 @media print{
-  .banner,.tab-bar,.pfab,.map-col{display:none!important;}
+  .banner,.tab-bar,.pfab,.map-col,.print-maps-btn{display:none!important;}
   .content-grid{display:block!important;}
   .panel-wrap{overflow:visible;padding:0;}
   .day-panel{display:block!important;page-break-before:always;}
@@ -127,6 +127,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   body{background:#fff;}
   .bday,.header{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 }
+
+/* PRINT — maps only mode */
+body.maps-print-mode .header,
+body.maps-print-mode .banner,
+body.maps-print-mode .tab-bar,
+body.maps-print-mode .map-col,
+body.maps-print-mode .pfab,
+body.maps-print-mode #day1,
+body.maps-print-mode #day2,
+body.maps-print-mode #day3,
+body.maps-print-mode #day4,
+body.maps-print-mode #day5,
+body.maps-print-mode #notes { display:none !important; }
+body.maps-print-mode #areas { display:block !important; }
+body.maps-print-mode .print-maps-btn { display:none !important; }
+body.maps-print-mode .amap { height:280px !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+body.maps-print-mode .area-grid { display:grid !important; grid-template-columns:1fr 1fr; gap:12px; }
+body.maps-print-mode .content-grid { display:block !important; }
+body.maps-print-mode .panel-wrap { overflow:visible; padding:8px; width:100% !important; }
+body.maps-print-mode body { background:#fff; }
 </style>
 </head>
 <body>
@@ -729,6 +749,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <h2>Maui Area Maps</h2>
           <div class="route">Tap each map to zoom and explore. Loads with internet — pins and streets shown.</div>
         </div>
+        <button class="print-maps-btn" onclick="printMapsOnly()" style="width:100%;padding:12px;background:#0077b6;color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px;">🖨️ Print Area Maps Only</button>
         <div class="area-grid">
           <div class="acard"><div class="acard-title">🏨 NW Maui — Ka'anapali &amp; Lahaina</div><div id="map-nw" class="amap"></div></div>
           <div class="acard"><div class="acard-title">🐢 SW Maui — Kihei &amp; Makena</div><div id="map-sw" class="amap"></div></div>
@@ -780,6 +801,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 // ── SERVICE WORKER ──────────────────────────────
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/maui-trip/sw.js').catch(function(){});
+}
+
+// ── PRINT MAPS ONLY ─────────────────────────────
+function printMapsOnly() {
+  document.body.classList.add('maps-print-mode');
+  setTimeout(function() {
+    window.print();
+    setTimeout(function() {
+      document.body.classList.remove('maps-print-mode');
+    }, 500);
+  }, 300);
 }
 
 // ── GLOBAL STATE ────────────────────────────────
